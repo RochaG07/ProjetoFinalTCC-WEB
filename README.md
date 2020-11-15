@@ -1,0 +1,44 @@
+**Checklist**
+
+- [x]  Página de login
+- [x]  Página de cadastro
+- [x]  Cadastrar usuário pelo front
+- [x]  Autenticação de usuário
+- [x]  Header
+- [x]  Navbar
+- [ ]  Página de esqueci minha senha funcionalidade
+- [ ]  Página de esqueci minha senha estilização
+- [ ]  Página de reset de senha funcionalidade
+- [ ]  Página de reset de senha estilização
+- [x]  Página de trocas disponíveis funcionalidade
+- [ ]  Página de trocas disponíveis estilização
+- [x]  Modal com detalhes de uma troca
+- [x]  Enviar convite para a troca selecionada pelo front
+- [x]  Exibir um com um erro se um usuário mandar um convite para uma troca mais de uma vez
+- [ ]  Filtragem de trocas por jogos
+- [ ]  Filtragem de trocas por consoles
+- [x]  Página de criar nova troca funcionalidade
+- [ ]  Página de criar nova troca estilização
+- [x]  Página de minhas trocas funcionalidade
+- [ ]  Página de minhas trocas estilização
+- [x]  Listar todos os convites pendentes de cada troca
+- [x]  Aceitar ou recusar convite em minhas trocas
+- [ ]  Desativar uma troca
+- [x]  Página de negociações que o usuário logado esta envolvido
+- [ ]  Desativar uma negociação
+- [x]  Página de meu perfil funcionalidade
+- [x]  Página de meu perfil estilização
+- [x]  Alterar informações do perfil
+- [x]  Alterar foto de avatar na página de meu perfil
+- [ ]  Página de compra da assinatura premium funcionalidade
+- [ ]  Página de compra da assinatura premium estilização
+- [ ]  Página de funções de admin funcionalidade
+- [ ]  Página de funções de admin estilização
+- [ ]  Cadastro de jogos funcionalidade
+- [ ]  Cadastro de jogos estilização
+- [ ]  Cadastro de consoles funcionalidade
+- [ ]  Cadastro de consoles estilização
+- [ ]  Envio de avisos
+- [ ]  Exibir avisos de um usuário
+- [ ]  Utilizar a API do stripe para criptografar dados de cartão do usuário
+- [ ]  Enviar dados de pagamento criptografados + informações do usuário para a rota de criação de assinatura no backend
