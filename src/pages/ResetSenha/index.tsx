@@ -11,19 +11,17 @@ import api from '../../services/api';
 import { useHistory, useLocation } from 'react-router-dom';
 import getValidationErrors from '../../utils/getValidationErrors';
 
-import logoImg from '../../assets/logo.svg';
-
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
-import { Container, Content, Background, AnimationContainer } from './styles';
+import { Container, Content, AnimationContainer } from './styles';
 
-interface ResetPasswordFormData {
-    password: string;
-    password_confirmation: string;
+interface ResetSenhaFormData {
+    senha: string;
+    senha_confirmacao: string;
 }
 
-const ResetPassword: React.FC = () => {
+const ResetSenha: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
 
     const { addToast } = useToast();
@@ -31,15 +29,15 @@ const ResetPassword: React.FC = () => {
     const history = useHistory();
     const location = useLocation();
 
-    const handleSubmit = useCallback(async (data: ResetPasswordFormData) => {    
+    const handleSubmit = useCallback(async (data: ResetSenhaFormData) => {    
         try {
             formRef.current?.setErrors({});
 
             //schema -> Utilizado para fazer a validação em um objeto
             const schema = Yup.object().shape({
-                password: Yup.string().required('Senha obrigatória'),
-                password_confirmation: Yup.string().oneOf(
-                    [Yup.ref('password'), undefined],
+                senha: Yup.string().required('Senha obrigatória'),
+                senha_confirmacao: Yup.string().oneOf(
+                    [Yup.ref('senha'), undefined],
                     'Confirmação incorreta',
                 ),
             });
@@ -48,16 +46,16 @@ const ResetPassword: React.FC = () => {
                 abortEarly: false,
             });
 
-            const { password, password_confirmation} = data;
+            const { senha, senha_confirmacao} = data;
             const token = location.search.replace('?token=', '');
 
             if(!token) {
                 throw new Error();
             }
 
-            await api.post('/password/reset', {
-                password,
-                password_confirmation,
+            await api.post('/senhas/resetar_senha', {
+                senha,
+                senha_confirmacao,
                 token
             });
 
@@ -90,10 +88,10 @@ const ResetPassword: React.FC = () => {
                     <Form ref={ formRef } onSubmit={ handleSubmit }>
                         <h1>Resetar senha</h1>
 
-                        <Input name="password" icon={FiLock} type="password" placeholder="Nova senha"/>
+                        <Input name="senha" icon={FiLock} type="password" placeholder="Nova senha"/>
 
                         <Input 
-                            name="password_confirmation" 
+                            name="senha_confirmacao" 
                             icon={FiLock} 
                             type="password" 
                             placeholder="Confirmação da senha"
@@ -105,10 +103,9 @@ const ResetPassword: React.FC = () => {
                 </AnimationContainer>
             </Content>
 
-            <Background />
         </Container>
     )
 
 };
 
-export default ResetPassword;
+export default ResetSenha;

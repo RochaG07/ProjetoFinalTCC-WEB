@@ -1,5 +1,5 @@
-import React, {useCallback, useRef} from 'react';
-import { FiArrowLeft, FiMail, FiUser, FiLock, FiPhone, FiItalic, FiMap, FiMapPin } from 'react-icons/fi';
+import React, {useCallback, useRef, useEffect, useState} from 'react';
+import { FiArrowLeft, FiMail, FiUser, FiLock, FiPhone, FiItalic } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import { Link, useHistory } from 'react-router-dom';
@@ -13,6 +13,7 @@ import getValidationErrors from '../../utils/getValidationErrors';
 
 import Input from '../../components/Input';
 import Button from '../../components/Button';
+import Select from '../../components/Select';
 
 import { Container, Content, AnimationContainer } from './styles';
 
@@ -22,9 +23,19 @@ interface CriarContaFormData {
     senha: string;
     nome: string;
     telefone: string;
-    bairro: string;
-    cidade: string;
-    uf: string;
+    municipio: string;
+    estado: string;
+}
+
+interface IOptions{
+    label: string,
+    value: string,
+    id: string,
+}
+
+interface IInfoIBGE{
+    nome: string,
+    id: string,
 }
 
 const CriarConta: React.FC = () => {
@@ -32,13 +43,27 @@ const CriarConta: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
     const { addToast } = useToast();
     const history = useHistory();
+    const [optionsEstados, setOptionsEstados] = useState<IOptions[]>([]);
+    const [optionsMunicipios, SetOptionsMunicipios] = useState<IOptions[]>([]);
+    const [keyMunicipio, setKeyMunicipio] = useState<string | null>();
 
-    //TODO na criação da conta trocar o campo uf por estado, mas no banco salvar com UF
+    useEffect(()=>{
+        api.get<IInfoIBGE[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome')
+        .then(response => {            
+            setOptionsEstados(response.data.map(item => ({
+                label: item.nome,
+                value: item.nome,
+                id: item.id,
+            })))
+        })
+    }, [])
 
     const handleSubmit = useCallback(
         async (data: CriarContaFormData) => {    
             try {
                 formRef.current?.setErrors({});
+
+                console.log(data);
 
                 //schema -> Utilizado para fazer a validação em um objeto
                 const schema = Yup.object().shape({
@@ -49,15 +74,10 @@ const CriarConta: React.FC = () => {
                     senha: Yup.string().min(6, 'no mínimo 6 digitos'),
                     nome: Yup.string().required('Nome Obrigatório'),
                     telefone: Yup.string().required('Obrigatório'),
-                    bairro: Yup.string().required('Obrigatório'),
-                    cidade: Yup.string().required('Obrigatório'),
-                    uf: Yup.string().required('Obrigatório'),
+                    municipio: Yup.string().required('Obrigatório'),
+                    estado: Yup.string().required('Obrigatório'),
                 });
 
-                //throw new Error();
-
-                //Não passa daqui
-                //update: passou, não estava passando por causa do email, se botar qualquercoisa@gmail.com vai
                 await schema.validate(data, {
                     abortEarly: false,  
                 });
@@ -90,6 +110,22 @@ const CriarConta: React.FC = () => {
             }
     }, [addToast, history]);
 
+    
+    async function handleEstadoChange(val: any): Promise<void> {
+        const id = val.id;
+
+        setKeyMunicipio(`key_municipio_${id}`);
+
+        api.get<IInfoIBGE[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${id}/municipios`)
+        .then(response => {            
+            SetOptionsMunicipios(response.data.map(item => ({
+                id: item.id,
+                label: item.nome,
+                value: item.nome,
+            })))
+        })
+    }
+
     return (
     <Container>
         <Content>
@@ -107,11 +143,19 @@ const CriarConta: React.FC = () => {
 
                     <Input name="telefone" icon={FiPhone} placeholder="Telefone"/>
 
-                    <Input name="cidade" icon={FiMap}  placeholder="Cidade"/>
+                    <Select 
+                        placeholder="Estado"
+                        name="estado"
+                        options={optionsEstados} 
+                        onChange={(val: any) => handleEstadoChange(val)}
+                    />
 
-                    <Input name="bairro" icon={FiMapPin} placeholder="Bairro"/>
-
-                    <Input name="uf" placeholder="UF"/>
+                    <Select 
+                        placeholder="Município"
+                        name="municipio"
+                        options={optionsMunicipios} 
+                        key={keyMunicipio}
+                    />
 
                     <Button type="submit">Criar conta</Button>
                 </Form>

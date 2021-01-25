@@ -100,6 +100,7 @@ const NovaTroca: React.FC = () => {
                 {
                     trocas &&
                     trocas.map(troca => (
+                        troca.ativo &&
                         <Troca key={troca.id} onClick={() => handleSelecionarTroca(troca)}>
                             <div className='specJogo'>
                                 <h1>{troca.nomeJogoOfertado}</h1>

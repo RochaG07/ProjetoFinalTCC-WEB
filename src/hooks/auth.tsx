@@ -9,9 +9,14 @@ interface Usuario {
     username: string;
     senha: string;
     telefone: string;
-    bairro: string;
-    cidade: string;
-    uf: string;
+    municipio: string;
+    estado: string;
+    idCustomer: string;
+    idSubscription: string;
+    trocasDisponiveis: number;
+    premiumAtivo: boolean;
+    possuiStatusDeAdm: boolean;
+    proxTrocaDisp: Date | null;
 }
 
 interface AuthState {
@@ -46,12 +51,14 @@ const AuthProvider: React.FC = ({ children }) => {
         const token = localStorage.getItem('@TCC:token');
         const usuario = localStorage.getItem('@TCC:usuario');
 
+        //TODO Redirecionar usuário para página de login caso o token tenha expirado
+
         if(token && usuario) {
             api.defaults.headers.authorization = `Bearer ${token}`;
 
-
             return { token, usuario: JSON.parse(usuario) };
         }
+
 
         return {} as AuthState;
     });
@@ -63,8 +70,10 @@ const AuthProvider: React.FC = ({ children }) => {
         });
 
         // Armazena a resposta da requisição no localstorage
-        const { token, usuario } = response.data;
-        
+        let { token, usuario, premiumAtivo } = response.data;
+
+        usuario.premiumAtivo = premiumAtivo;
+
         localStorage.setItem('@TCC:token', token);
         localStorage.setItem('@TCC:usuario', JSON.stringify(usuario));
         
@@ -93,7 +102,7 @@ const AuthProvider: React.FC = ({ children }) => {
             });
         },
         [data.token, setData]
-        )
+    )
 
     return (
         <AuthContext.Provider value={{usuario: data.usuario, login, logout, atualizaUsuario}}>
@@ -101,6 +110,8 @@ const AuthProvider: React.FC = ({ children }) => {
         </AuthContext.Provider>
     );
 };
+
+
 
 function useAuth():AuthContextData {
     const context = useContext(AuthContext);

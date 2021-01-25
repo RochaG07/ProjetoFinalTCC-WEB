@@ -10,7 +10,7 @@ import Routes from './routes/index';
 import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 
-const stripePromise = loadStripe('');
+const stripePromise = loadStripe('pk_test_51Ha6nzB0QexI4OApFmIQ6ijwOseWzSpEUyrxvYaBxR1PrUGEHBczDLBPukedUtBNolK0OWM9pBCKzgx2DLToHFIO00INq8z3cY');
 
 const App: React.FC = () => (
     <Elements stripe={stripePromise}>

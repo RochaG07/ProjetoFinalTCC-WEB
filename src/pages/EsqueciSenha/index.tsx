@@ -1,10 +1,9 @@
 import React, { useRef, useCallback } from 'react';
-import { FiLogIn, FiLock, FiUser} from 'react-icons/fi';
+import { FiArrowLeft, FiMail} from 'react-icons/fi';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 
-import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 
 import { Link, useHistory } from 'react-router-dom';
@@ -12,44 +11,44 @@ import getValidationErrors from '../../utils/getValidationErrors';
 
 //import logoImg from '../../assets/logo.svg';
 
+import api from '../../services/api';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
 import { Container, Content, AnimationContainer } from './styles';
 
-interface LoginFormData {
-    username: string;
-    senha: string;
+interface EsqueciMinhaSenhaFormData {
+    email: string;
 }
-
-const Login: React.FC = () => {
+const EsqueciSenha: React.FC = () => {
     const formRef = useRef<FormHandles>(null);
 
-    const { login } = useAuth();
     const { addToast } = useToast();
 
     const history = useHistory();
 
-    const handleSubmit = useCallback(async (data: LoginFormData) => {    
+    const handleSubmit = useCallback(async (data: EsqueciMinhaSenhaFormData) => {    
         try {
             formRef.current?.setErrors({});
 
             //schema -> Utilizado para fazer a validação em um objeto
             const schema = Yup.object().shape({
-                username: Yup.string().required('Usuário Obrigatório'),
-                senha: Yup.string().required('Senha obrigatória'),
+                email: Yup.string().required('Email Obrigatório').email(),
             });
 
             await schema.validate(data, {
                 abortEarly: false,
             });
 
-            await login({
-                username: data.username,
-                senha: data.senha,
+            await api.post('/senhas/esqueci', data);
+
+            addToast({
+                type: "success",
+                title: 'Email enviado',
+                description: 'O email de recuperação foi enviado com sucesso'
             });
 
-            history.push('/trocas-disponiveis');
+            history.push('/login');
             
         } catch (err) {
 
@@ -66,32 +65,27 @@ const Login: React.FC = () => {
 
             addToast({
                 type: 'error',
-                title: 'Erro na autenticação',
-                description: 'Ocorreu um erro ao fazer login'
+                title: 'Erro na envio',
+                description: 'Ocorreu um erro ao enviar email'
             });
         }
-    }, [login, addToast, history]);
+    }, [ addToast, history]);
 
     return(
         <Container>
             <Content>
                 <AnimationContainer>
                     <Form ref={ formRef } onSubmit={ handleSubmit }>
-                        <h1>Faça seu Login</h1>
+                        <h1>Digite seu e-mail de recuperação</h1>
+                        <Input name="email" icon={FiMail}  placeholder="E-mail"/>
 
-                        <Input name="username" icon={FiUser} placeholder="Usuário"/>
-
-                        <Input name="senha" icon={FiLock} type="password" placeholder="Senha"/>
-
-                        <Button type="submit">Entrar</Button>
-
-                        <Link to="/esqueci-minha-senha">Esqueci minha senha</Link>
+                        <Button type="submit">Enviar</Button>
                     </Form>
 
-                    <Link to="/criar-conta">
-                        <FiLogIn />
-                        Criar conta
-                    </Link>
+                    <Link to="/login">
+                        <FiArrowLeft />
+                        Voltar para login
+                    </Link>  
                 </AnimationContainer>
             </Content>
         </Container>
@@ -99,4 +93,4 @@ const Login: React.FC = () => {
 
 };
 
-export default Login;
+export default EsqueciSenha;

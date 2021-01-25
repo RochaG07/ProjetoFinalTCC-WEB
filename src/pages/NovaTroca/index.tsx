@@ -13,13 +13,16 @@ import Input from '../../components/Input';
 
 import * as Yup from 'yup';
 
-import { Container, Content} from './styles';
+import { Container, Content, Capas, Ofertado, Desejado} from './styles';
 
 import api from '../../services/api';
 
+import { addWeeks } from 'date-fns';
 import { FormHandles } from '@unform/core';
 import getValidationErrors from '../../utils/getValidationErrors';
 import { useHistory } from 'react-router-dom';
+
+import capaPlaceholder from '../../assets/placeholder-image.png';
 
 interface IJogo{
     id: string,
@@ -33,18 +36,27 @@ interface IOptions{
     value: string,
 }
 
+interface IOptionsJogos{
+    label: string,
+    value: string,
+    capa_url: string,
+    consoles: string[]
+}
+
 const TrocasDisponiveis: React.FC = () => {
-    const { usuario } = useAuth();
+    const { usuario, atualizaUsuario } = useAuth();
     const { addToast } = useToast();
 
-    const [jogos, setJogos] = useState<IJogo[]>([]);
-    const [optionsJogos , setOptionsJogos] = useState<IOptions[]>([]);
+    const [optionsJogos , setOptionsJogos] = useState<IOptionsJogos[]>([]);
 
     const [optionsConsolesDoJogoDesejado, setOptionsConsolesDoJogoDesejado] = useState<IOptions[]>([]);
     const [optionsConsolesDoJogoOfertado, setOptionsConsolesDoJogoOfertado] = useState<IOptions[]>([]);
 
-    //const [consoleJogoOfertado, setConsoleJogoOfertado] = useState<IOptions[]>([]);
+    const [URLcapaJogoDesejadoSelecionado, setURLcapaJogoDesejadoSelecionado] = useState<string | null>();
+    const [URLcapaJogoOfertadoSelecionado, setURLcapaJogoOfertadoSelecionado] = useState<string | null>();
 
+    const [keyConsolesDesejados, setKeyConsolesDesejados] = useState<string | null>();
+    const [keyConsolesOfertados, setKeyConsolesOfertados] = useState<string | null>();
 
     const formRef = useRef<FormHandles>(null);
     const history = useHistory();
@@ -53,73 +65,66 @@ const TrocasDisponiveis: React.FC = () => {
         async function loadJogos(): Promise<void> {
             api.get<IJogo[]>('/jogos')
             .then(response => {
-                setJogos(response.data);
+                setOptionsJogos(response.data.map( jogo => ({
+                        label: jogo.nome,
+                        value: jogo.id,
+                        capa_url: jogo.capa_url,
+                        consoles: jogo.consoles,
+                })));
             })  
         }
 
         loadJogos();
     }, []);
 
-    useEffect(() => {
-        async function loadOptions(): Promise<void> {
-            setOptionsJogos(jogos.map( jogo => {
-                return({
-                    label: jogo.nome,
-                    value: jogo.id,
-                })
-            }));
-        }
+    //Utiliza como base o array dos jogos preenchido anteriormente e 
+    //forma um novo com o formato pedido pelo react-select  
 
-        loadOptions();
-    }, [jogos]);
-
-    const handleSubmit = useCallback(async () => {
-        const idJogoOfertado = formRef.current?.getFieldValue('jogoOfertado');
-        const idJogoDesejado = formRef.current?.getFieldValue('jogoDesejado');
-
-        const consoleJogoOfertado = formRef.current?.getFieldValue('consolesDoJogoOfertado');
-        const consoleJogoDesejado = formRef.current?.getFieldValue('consolesDoJogoDesejado');
-
-
-        const descricao = formRef.current?.getFieldValue('descricao');
-
-        //TODO Tornar a descrição opcional
-        //TODO Resetar o campo de consoles quando o jogo é alterado
-        //TODO Mostrar a foto do jogos selecionados
+    const handleSubmit = useCallback(async (formData) => {
 
         const data = {
-            descricao,
-            idJogoOfertado,
-            idJogoDesejado,
-            consoleJogoOfertado,
-            consoleJogoDesejado,
+            idJogoOfertado: formData.jogoOfertado,
+            idJogoDesejado: formData.jogoDesejado,
+            consoleJogoOfertado: formData.consolesDoJogoDesejado,
+            consoleJogoDesejado: formData.consolesDoJogoDesejado,
+            descricao: formData.descricao,
         }
-
+        
         try{
             const schema = Yup.object().shape({
                 idJogoOfertado: Yup.string().required('Obrigatório'),
                 idJogoDesejado: Yup.string().required('Obrigatório'),
                 consoleJogoOfertado: Yup.string().required('Obrigatório'),
                 consoleJogoDesejado: Yup.string().required('Obrigatório'),
-                descricao: Yup.string().required('Obrigatório'),
+                descricao: Yup.string(),
             });
 
             await schema.validate(data, {
                 abortEarly: false,
             });
-
-            console.log(data);
             
             await api.post('/trocas', data);
 
-            history.push('/minhas-trocas');
+            if(!usuario.premiumAtivo){
+                let proxTrocaDisp = usuario.proxTrocaDisp;
 
+                if(!proxTrocaDisp){
+                    proxTrocaDisp = addWeeks(new Date(Date.now()), 1);
+                }
+    
+                atualizaUsuario({
+                    ...usuario,
+                    trocasDisponiveis: usuario.trocasDisponiveis - 1,
+                    proxTrocaDisp,
+                });        
+            }
+
+            history.push('/minhas-trocas');
         } catch (err) {
             if(err instanceof Yup.ValidationError) {
 
                 const errors = getValidationErrors(err);
 
-                // ? -> Serve para verificar se a variável existe para então chamar a função setErrors (optional chaining)
                 formRef.current?.setErrors({errors});
 
                 return;
@@ -131,37 +136,25 @@ const TrocasDisponiveis: React.FC = () => {
                 description: 'Ocorreu um erro ao criar troca'
             });
         }
-    },[addToast, history])
+    },[addToast, history, atualizaUsuario, usuario])
 
-    async function handleJogoOfertado(val: any): Promise<void> {
-        const id = val.value;
+    async function handleJogoOfertado(jogoSelecionado: any): Promise<void> {
+        setKeyConsolesOfertados(`key_ofert_${jogoSelecionado.value}`);
 
-        let consoles: string[] = [];
-        
-        for (let i = 0; i < jogos.length; i++) {
-            if(jogos[i].id === id){
-                consoles = jogos[i].consoles;
-            }
-        }
+        setURLcapaJogoOfertadoSelecionado(jogoSelecionado.capa_url);
 
-        setOptionsConsolesDoJogoOfertado(consoles.map(cons => ({
+        setOptionsConsolesDoJogoOfertado(jogoSelecionado.consoles.map((cons: string) => ({
             label: cons,
             value: cons,
         })));
     }
 
-    async function handleJogoDesejado(val: any): Promise<void> {
-        const id = val.value;
+    async function handleJogoDesejado(jogoSelecionado: any): Promise<void> {
+        setKeyConsolesDesejados(`key_ofert_${jogoSelecionado.value}`);
 
-        let consoles: string[] = [];
-        
-        for (let i = 0; i < jogos.length; i++) {
-            if(jogos[i].id === id){
-                consoles = jogos[i].consoles;
-            }
-        }
+        setURLcapaJogoDesejadoSelecionado(jogoSelecionado.capa_url);
 
-        setOptionsConsolesDoJogoDesejado(consoles.map(cons => ({
+        setOptionsConsolesDoJogoDesejado(jogoSelecionado.consoles.map((cons: string) => ({
             label: cons,
             value: cons,
         })));
@@ -173,25 +166,53 @@ const TrocasDisponiveis: React.FC = () => {
             <Navbar/>   
             <Content>
                 <Form ref={ formRef } onSubmit={handleSubmit}>
-                    <Select 
-                        name="jogoOfertado" 
-                        options={optionsJogos} 
-                        onChange={(val: any) => handleJogoOfertado(val)}
-                    />
-                    <Select 
-                        name="jogoDesejado" 
-                        options={optionsJogos} 
-                        onChange={(val: any) => handleJogoDesejado(val)}
-                    />
+                    <Capas>
+                    {
+                        URLcapaJogoOfertadoSelecionado?
+                        <img src={URLcapaJogoOfertadoSelecionado} alt="Jogo ofertado"/>
+                        :
+                        <img src={capaPlaceholder} alt="Jogo ofertado"/>
+                    }
+                    {
+                        URLcapaJogoDesejadoSelecionado?
+                        <img src={URLcapaJogoDesejadoSelecionado} alt="Jogo desejado"/>
+                        :
+                        <img src={capaPlaceholder} alt="Jogo desejado"/>
+                    }
+                    </Capas>
 
-                    <Select 
-                        name="consolesDoJogoOfertado"
-                        options={optionsConsolesDoJogoOfertado} 
-                    />
-                    <Select 
-                        name="consolesDoJogoDesejado" 
-                        options={optionsConsolesDoJogoDesejado} 
-                    />
+                    <Ofertado>
+                        <label htmlFor='jogoOfertado'>Jogo ofertado</label>
+                        <Select 
+                            name="jogoOfertado" 
+                            options={optionsJogos} 
+                            onChange={(jogoSelecionado: any) => handleJogoOfertado(jogoSelecionado)}
+                            isSearchable={true}
+                        />
+                        <label htmlFor='consolesDoJogoOfertado'>Consoles</label>
+                        <Select 
+                            name="consolesDoJogoOfertado"
+                            options={optionsConsolesDoJogoOfertado} 
+                            key={keyConsolesOfertados}
+                        />
+                    </Ofertado>
+
+                    <Desejado>
+                        <label htmlFor='jogoDesejado'>Jogo desejado</label> 
+                        <Select 
+                            name="jogoDesejado" 
+                            options={optionsJogos} 
+                            onChange={(jogoSelecionado: any) => handleJogoDesejado(jogoSelecionado)}
+                            isSearchable={true}
+
+                        />
+                        <label htmlFor='consolesDoJogoDesejado'>Consoles</label>
+                        <Select 
+                            name="consolesDoJogoDesejado" 
+                            options={optionsConsolesDoJogoDesejado} 
+                            key={keyConsolesDesejados}
+                        />
+                    </Desejado>
 
                     <Input name='descricao' placeholder='Descricão da troca'/>
 

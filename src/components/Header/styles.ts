@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import {saturate, shade} from 'polished';
 
 export const Container = styled.header`
     padding: 32px 0;
@@ -15,18 +16,41 @@ export const HeaderContent = styled.div`
         height: 80px;
     }
 
-    button {
+    div.icones {
         margin-left: auto;
+
+
+
+        button {
         background: transparent;
         border: 0;
+        margin-left: 20px;
 
-        svg {
-            color: #999591;
-            width: 20px;
-            height: 20px;
-        } 
+            svg {
+                color: #999591;
+                width: 20px;
+                height: 20px;
+            } 
+            svg.admIcon {
+                color: #b58435;
+            } 
+
+        }
+
+        button.adm :hover{
+            color: ${saturate(0.8, '#b58435')}
+        }
+
+        button.sair :hover {
+            color: red;
+        }
+
+        button.sino :hover {
+            color: ${saturate(0.4, '#68a')};
+        }
     }
 `;
+
 
 
 export const Profile = styled.div`
@@ -64,5 +88,34 @@ export const Profile = styled.div`
 
     strong {
         color: #68a;
+    }
+`;
+
+export const MenuAdm = styled.ul`
+    
+    list-style-type:none;
+
+    li{
+        
+    }
+
+    button{
+        background: #68a;
+        height: 30px;
+        border-radius: 10px;
+        border: 0;
+        padding: 0 5px;
+        color: #fff;
+        width: 100%;
+        font-weight: 500;
+        margin-top: 5px;
+
+        transition: background-color 0.2s;
+
+    }
+
+
+    button :hover { 
+        background: ${shade(0.2, '#68a')}
     }
 `;

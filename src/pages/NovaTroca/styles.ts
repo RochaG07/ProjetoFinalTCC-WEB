@@ -13,7 +13,24 @@ export const Content = styled.div`
 	margin-left : 14%;
 	margin-right : 14%;
 
+
     background-color: #181b1f;
+`;
+
+export const Capas = styled.div`
+
+    img{
+        border: 1px solid black;
+        height: 320px;
+        width: 200px;
+        margin: 10px 10px 10px 10px;
+    }
+`;
+
+export const Ofertado = styled.div`
+`;
+
+export const Desejado = styled.div`
 `;
 
 export const Troca = styled.div`

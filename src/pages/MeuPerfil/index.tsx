@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, ChangeEvent } from 'react';
+import React, { useRef, useCallback, ChangeEvent, useState, useEffect } from 'react';
 
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
@@ -14,6 +14,7 @@ import getValidationErrors from '../../utils/getValidationErrors';
 import Header from '../../components/Header';
 import Navbar from '../../components/Navbar';
 import Input from '../../components/Input';
+import Select from '../../components/Select';
 
 import api from '../../services/api';
 
@@ -26,21 +27,45 @@ interface PerfilFormData {
     email: string;
     nome: string;
     telefone: string;
-    bairro: string;
-    cidade: string;
-    uf: string;
+    municipio: string;
+    estado: string;
     senha_antiga: string;
     senha: string;
     senha_confirmacao: string;
 }
 
+interface IOptions{
+    label: string,
+    value: string,
+    id: string,
+}
+interface IInfoIBGE{
+    nome: string,
+    id: string,
+}
+//TODO Atualizar email vinculado a conta customer no stripe se usuário alterar email
+
 const MeuPerfil: React.FC = () => {
     const { usuario, atualizaUsuario } = useAuth();
     const { addToast } = useToast();
+    const [optionsEstados, setOptionsEstados] = useState<IOptions[]>([]);
+    const [optionsMunicipios, SetOptionsMunicipios] = useState<IOptions[]>([]);
+    const [keyMunicipio, setKeyMunicipio] = useState<string | null>();
 
     const history = useHistory();
     
     const formRef = useRef<FormHandles>(null);
+
+    useEffect(()=>{
+        api.get<IInfoIBGE[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome')
+        .then(response => {            
+            setOptionsEstados(response.data.map(item => ({
+                label: item.nome,
+                value: item.nome,
+                id: item.id,
+            })))
+        })
+    }, [])
 
     const handleSubmit = useCallback(async (data: PerfilFormData) => {    
         try {
@@ -53,9 +78,8 @@ const MeuPerfil: React.FC = () => {
                 .email('Digite um e-mail válido'),
                 nome: Yup.string().required('Nome Obrigatório'),
                 telefone: Yup.string().required('Obrigatório'),
-                bairro: Yup.string().required('Obrigatório'),
-                cidade: Yup.string().required('Obrigatório'),
-                uf: Yup.string().required('Obrigatório'),
+                municipio: Yup.string().required('Obrigatório'),
+                estado: Yup.string().required('Obrigatório'),
                 senha_antiga: Yup.string(),
                 senha: Yup.string().when('senha_antiga', {
                     is: val => !!val.length,
@@ -80,9 +104,8 @@ const MeuPerfil: React.FC = () => {
                 email, 
                 nome,
                 telefone, 
-                bairro, 
-                cidade, 
-                uf,
+                municipio, 
+                estado, 
                 senha_antiga, 
                 senha, 
                 senha_confirmacao, 
@@ -94,9 +117,8 @@ const MeuPerfil: React.FC = () => {
                 email,
                 nome,
                 telefone,
-                bairro,
-                cidade,
-                uf,
+                municipio,
+                estado,
                 ...(senha_antiga
                     ? {
                         senha_antiga,
@@ -143,6 +165,8 @@ const MeuPerfil: React.FC = () => {
                 const data = new FormData();
 
                 data.append('avatar', e.target.files[0]);
+                
+                console.log(data);
 
                 api.patch('usuarios/avatar/', data).then(response => {
                     atualizaUsuario(response.data);
@@ -155,6 +179,21 @@ const MeuPerfil: React.FC = () => {
             }
     }, [addToast, atualizaUsuario]);
 
+    async function handleEstadoChange(val: any): Promise<void> {
+        const id = val.id;
+
+        setKeyMunicipio(`key_municipio_${id}`);
+
+        api.get<IInfoIBGE[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${id}/municipios`)
+        .then(response => {            
+            SetOptionsMunicipios(response.data.map(item => ({
+                id: item.id,
+                label: item.nome,
+                value: item.nome,
+            })))
+        })
+    }
+
     return(
         <Container>
             <Header />
@@ -165,9 +204,6 @@ const MeuPerfil: React.FC = () => {
                     nome: usuario.nome,
                     email: usuario.email,
                     telefone: usuario.telefone,
-                    bairro: usuario.bairro,
-                    cidade: usuario.cidade,
-                    uf: usuario.uf,
                 }} onSubmit={handleSubmit}
                 >
                     <AvatarInput>                    
@@ -186,11 +222,22 @@ const MeuPerfil: React.FC = () => {
 
                     <Input name="telefone" icon={FiPhone} placeholder="Telefone"/>
 
-                    <Input name="cidade" icon={FiMap}  placeholder="Cidade"/>
+                    <Select 
+                        placeholder="Estado"
+                        name="estado"
+                        options={optionsEstados} 
+                        onChange={(val: any) => handleEstadoChange(val)}
+                        defaultInputValue={usuario.estado}
+                    />
 
-                    <Input name="bairro" icon={FiMapPin} placeholder="Bairro"/>
+                    <Select 
+                        placeholder="Município"
+                        name="municipio"
+                        options={optionsMunicipios} 
+                        key={keyMunicipio}
+                        defaultInputValue={usuario.municipio}
 
-                    <Input name="uf" placeholder="UF"/>
+                    />
 
                     <Input containerStyle={{marginTop: 24}} name="senha_antiga" icon={FiLock} type="password" placeholder="Senha atual"/>
 

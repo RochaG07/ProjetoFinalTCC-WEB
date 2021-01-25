@@ -4,7 +4,10 @@ import { lighten, shade } from 'polished';
 
 //import BG from '../../assets/dark-mosaic.png';
 
-export const Container = styled.nav`
+export const Container = styled.div`
+`;
+
+export const Links = styled.nav`
     background-color: ${shade(0.8, '#123')};
 
     display: flex;
@@ -15,7 +18,37 @@ export const Container = styled.nav`
     border-bottom: 1px solid ${shade(0.8, '#123')};
     margin-left : 14%;
 	margin-right : 14%;
+`;
 
+
+export const EsconderNavbarDiv = styled.div`
+    display: flex;
+    background-color: #1C2024;  
+    justify-content: space-around;
+    
+    button{
+
+        background-color: #1c2024;
+        width: 40px;
+        height: 20px;
+
+        border-top-left-radius: 100px;
+        border-top-right-radius: 100px;
+        border: none;
+
+        
+        svg{
+            color: #68a;
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    button :hover{
+        svg{
+            color: #123;
+        }
+    }
 `;
 
 export const NavbarLink = styled(Link)`
@@ -31,7 +64,6 @@ export const NavbarLink = styled(Link)`
     text-decoration:none;
     letter-spacing:2px;
     text-transform:uppercase;
-
     
     :hover{
         background: ${lighten(0.03, '#123')};

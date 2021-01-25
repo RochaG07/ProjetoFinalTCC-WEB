@@ -8,6 +8,7 @@ import { FiArrowRightCircle } from 'react-icons/fi';
 import { Container, Content, Troca, Convites} from './styles';
 
 import api from '../../services/api';
+import { useAuth } from '../../hooks/auth';
 
 interface ITrocaComConvites{
     troca: ITroca,
@@ -24,7 +25,7 @@ interface ITroca {
     urlDaCapaJogoDesejado: string,
     nomeConsoleJogoOfertado: string,
     nomeConsoleJogoDesejado: string,
-  }
+}
 
 interface IConvite {
     id: string,
@@ -43,6 +44,9 @@ interface IResponderConvite{
 
 const Negociacoes: React.FC = () => {
     const [trocasComConvites, setTrocasComConvites] = useState<ITrocaComConvites[]>([]);
+
+    const { usuario } = useAuth();
+
 
     useEffect(() => {
         async function loadTrocas(): Promise<void> {
@@ -94,7 +98,7 @@ const Negociacoes: React.FC = () => {
     return(
         <Container>          
             <Header/> 
-            <Navbar/>    
+            <Navbar/>  
             <Content>
                 {
                     trocasComConvites &&
