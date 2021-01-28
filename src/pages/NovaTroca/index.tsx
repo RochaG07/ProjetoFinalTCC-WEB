@@ -150,7 +150,7 @@ const TrocasDisponiveis: React.FC = () => {
     }
 
     async function handleJogoDesejado(jogoSelecionado: any): Promise<void> {
-        setKeyConsolesDesejados(`key_ofert_${jogoSelecionado.value}`);
+        setKeyConsolesDesejados(`key_desej_${jogoSelecionado.value}`);
 
         setURLcapaJogoDesejadoSelecionado(jogoSelecionado.capa_url);
 

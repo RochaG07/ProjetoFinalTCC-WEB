@@ -20,37 +20,6 @@ export const Links = styled.nav`
 	margin-right : 14%;
 `;
 
-
-export const EsconderNavbarDiv = styled.div`
-    display: flex;
-    background-color: #1C2024;  
-    justify-content: space-around;
-    
-    button{
-
-        background-color: #1c2024;
-        width: 40px;
-        height: 20px;
-
-        border-top-left-radius: 100px;
-        border-top-right-radius: 100px;
-        border: none;
-
-        
-        svg{
-            color: #68a;
-            width: 20px;
-            height: 20px;
-        }
-    }
-
-    button :hover{
-        svg{
-            color: #123;
-        }
-    }
-`;
-
 export const NavbarLink = styled(Link)`
     color: #999591;
 

@@ -17,6 +17,8 @@ interface ITroca {
   urlDaCapaJogoDesejado: string,
   nomeConsoleJogoOfertado: string,
   nomeConsoleJogoDesejado: string,
+  estado: string,
+  municipio: string,
 }
 
 interface IModalProps {
