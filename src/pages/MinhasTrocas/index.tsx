@@ -1,18 +1,20 @@
-import React, { useCallback, useEffect, useState} from 'react';
+import React, { useEffect, useState} from 'react';
 
 import Header from '../../components/Header';
 import Navbar from '../../components/Navbar';
 
-import { FiArrowRightCircle } from 'react-icons/fi';
+import { FiArrowRightCircle, FiInbox, FiX } from 'react-icons/fi';
 
-import { Container, Content, Troca, Convites} from './styles';
+import { Container, Content, Troca} from './styles';
+import ModalConvites from '../../components/ModalConvites';
+import { Badge } from '@material-ui/core';
 
 import api from '../../services/api';
-import { useAuth } from '../../hooks/auth';
 
-interface ITrocaComConvites{
+
+interface ITrocaENumDeConvites{
     troca: ITroca,
-    convites: IConvite[],
+    convitesNaoRespondidos: number,
 }
 
 interface ITroca {
@@ -27,6 +29,10 @@ interface ITroca {
     nomeConsoleJogoDesejado: string,
 }
 
+interface IMostrarConvites{
+    idTroca: string,
+}
+
 interface IConvite {
     id: string,
     mensagem: string,
@@ -37,120 +43,96 @@ interface IConvite {
     nome_solicitador: string,
 }
 
-interface IResponderConvite{
-    e: any,
-    respostaAoConvite: string,
-}
-
 const Negociacoes: React.FC = () => {
-    const [trocasComConvites, setTrocasComConvites] = useState<ITrocaComConvites[]>([]);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [idTrocaSelecionada, setIdTrocaSelecionada] = useState<string | null>();
 
-    const { usuario } = useAuth();
-
+    const [trocas, setTrocas] = useState<ITrocaENumDeConvites[]>([]);
 
     useEffect(() => {
         async function loadTrocas(): Promise<void> {
-            api.get<ITrocaComConvites[]>('/trocas/proprias')
+            api.get<ITrocaENumDeConvites[]>('/trocas/proprias')
             .then(response => {
-                setTrocasComConvites(response.data);
+                setTrocas(response.data);
             })
         }
 
         loadTrocas();
     }, []);
 
-    const handleResposta = useCallback(
-        async (data: IResponderConvite) => {
-            const stringCompleta: string = data.e.value;
-
-            const barPosition = stringCompleta.search('/');
-
-            const idConvite = stringCompleta.substr(0, barPosition);
-            const idTroca = stringCompleta.substr(barPosition + 1, stringCompleta.length);
-
-            await api.put('/trocas/convites', {
-                respostaAoConvite: data.respostaAoConvite,
-                idConvite
-            });
-            
-            // Remove o convite da lista
-            const novasTrocas = trocasComConvites.map(troca => {
-                if(troca.troca.id === idTroca){
-                    const novosConvites: IConvite[] = troca.convites.filter(convite => convite.id !== idConvite);
-                    return({
-                        troca: troca.troca,
-                        convites: novosConvites,
-                    });
-                } else {
-                    return troca;       
-                }
-            })
-
-            setTrocasComConvites(novasTrocas);
-    }, [trocasComConvites]);
-
     async function handleDesativarTroca(idTroca: string): Promise<void> {
         api.delete(`/trocas/${idTroca}`);
 
-        setTrocasComConvites(trocasComConvites.filter(troca => troca.troca.id !== idTroca));
+        setTrocas(trocas.filter(troca => troca.troca.id !== idTroca));
+    }
+
+    function handleMostrarConvites({idTroca}: IMostrarConvites): void {
+        setIdTrocaSelecionada(idTroca);
+
+        toggleModal();
+    }
+
+    function toggleModal(): void {
+        setModalOpen(!modalOpen);
+    }
+
+    function reduzNumDeConvitesNaoRespondidos(idTroca: string): void {
+        let trocaAlvo = trocas.find(troca => (troca.troca.id === idTroca));
+
+        if(trocaAlvo){
+            trocaAlvo.convitesNaoRespondidos--;
+        }
     }
     
     return(
         <Container>          
             <Header/> 
-            <Navbar/>  
+            <Navbar selectedPage={'minhas-trocas'}/>  
             <Content>
-                {
-                    trocasComConvites &&
-                    trocasComConvites.map(trocaComConvites => (
-                        trocaComConvites.troca.ativo &&
-                        <React.Fragment key={trocaComConvites.troca.id}>
-                        <Troca  key={trocaComConvites.troca.id}>
-                            <div className='capas'>
-                                <img src={trocaComConvites.troca.urlDaCapaJogoOfertado} alt={trocaComConvites.troca.nomeJogoOfertado} />
-                                <FiArrowRightCircle/>
-                                <img src={trocaComConvites.troca.urlDaCapaJogoDesejado} alt={trocaComConvites.troca.nomeJogoDesejado} />
-                            </div>
-                            <div className='specJogo'>
-                                <h1>{trocaComConvites.troca.nomeJogoOfertado}</h1>
-                                <p>{trocaComConvites.troca.nomeConsoleJogoOfertado}</p>
-                            </div>
-                            <div className='specJogo'>
-                                <h1>{trocaComConvites.troca.nomeJogoDesejado}</h1>
-                                <p>{trocaComConvites.troca.nomeConsoleJogoDesejado}</p>
-                            </div>
-                            <button onClick={() => handleDesativarTroca(trocaComConvites.troca.id)}>Excluir troca</button>
-                        </Troca>
-                            {
-                                trocaComConvites.convites.map(convite => (
-                                    convite.foiAceito === null &&
-                                    <Convites key={convite.id}>
-                                        <h1>Convite de {convite.nome_solicitador}</h1>
-                                        <p>{convite.mensagem}</p>
-                                        <button 
-                                        type="button" 
-                                        value={convite.id+'/'+trocaComConvites.troca.id}
-                                        onClick={(e) => handleResposta({
-                                            e: e.target,
-                                            respostaAoConvite: 'aceitar',
-                                        })}>
-                                            Aceitar
-                                        </button>
-                                        <button 
-                                        type="button" 
-                                        value={convite.id+'/'+trocaComConvites.troca.id}
-                                        onClick={(e) => handleResposta({
-                                            e: e.target,
-                                            respostaAoConvite: 'recusar',
-                                        })}>
-                                            Recusar
-                                        </button>
-                                    </Convites>
-                                ))
-                            }
-                        </React.Fragment>
-                    ))
-                }
+            {        
+                idTrocaSelecionada &&   
+                <ModalConvites
+                    isOpen={modalOpen}
+                    setIsOpen={toggleModal}
+                    idTroca={idTrocaSelecionada}
+                    reduzNumDeConvitesNaoRespondidos={reduzNumDeConvitesNaoRespondidos}
+                /> 
+            }
+            {
+                trocas &&
+                trocas.map(troca => (
+                    troca.troca.ativo &&
+                    <Troca  key={troca.troca.id}>
+                        <div className='capas'>
+                            <img src={troca.troca.urlDaCapaJogoOfertado} alt={troca.troca.nomeJogoOfertado} />
+                            <FiArrowRightCircle/>
+                            <img src={troca.troca.urlDaCapaJogoDesejado} alt={troca.troca.nomeJogoDesejado} />
+                        </div>
+                        <div className='specJogo'>
+                            <h1>{troca.troca.nomeJogoOfertado}</h1>
+                            <p>{troca.troca.nomeConsoleJogoOfertado}</p>
+                        </div>
+                        <div className='specJogo'>
+                            <h1>{troca.troca.nomeJogoDesejado}</h1>
+                            <p>{troca.troca.nomeConsoleJogoDesejado}</p>
+                        </div>
+
+                        <div className='icones'>
+                            <button className='excluir' onClick={() => handleDesativarTroca(troca.troca.id)}>
+                                <FiX />
+                            </button>
+
+                            <Badge badgeContent={troca.convitesNaoRespondidos} color="secondary" invisible={modalOpen}>
+                                <button className='convites' onClick={() => handleMostrarConvites({
+                                    idTroca: troca.troca.id,
+                                    })}>
+                                    <FiInbox/>
+                                </button>
+                            </Badge>
+                        </div>
+                    </Troca>
+                ))
+            }
             </Content>
         </Container>
     )

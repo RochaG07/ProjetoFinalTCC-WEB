@@ -1,39 +1,23 @@
 import styled from 'styled-components';
-import { shade } from 'polished';
 import { Form as Unform } from '@unform/web';
 
-export const Negociacao = styled.div`
+export const Convite = styled.div`
   margin-top: 35px;
   border-radius: 5px;
   height : 220px;
   background-color: #68a;
   box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+  border: 2px solid #68a;
 
   width: 92%;
 
   display: flex;
   justify-content: center;
-
-  h1 {
-    font-weight: 600;
-    font-size: 36px;
-    line-height: 36px;
-    margin-bottom: 40px;
-  }
-
-  
-  &:hover{
-    background: ${shade(0.2, '#68a')};
-    cursor: pointer;
-  }
 `;
-
 export const Form = styled(Unform)`
   padding: 48px 40px;
   display: flex;
   flex-direction: column;
-
-  
 
   h1 {
     font-weight: 600;
@@ -45,7 +29,9 @@ export const Form = styled(Unform)`
   button {
     margin-top: 48px;
     align-self: flex-end;
+  }
 
+  button {
     font-weight: 600;
     border-radius: 8px;
     border: 0;
@@ -70,4 +56,29 @@ export const Form = styled(Unform)`
     }
   }
 
+  div.capas{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin: 10px 0 10px 0;
+
+        background-color: #123;
+        border-radius: 5px;
+
+        img{
+
+            border: 1px solid black;
+            height: 160px;
+            width: 100px;
+            margin: 0 10px 0 10px;
+        }
+
+        svg{
+            height: 80px;
+            width: 50px;
+            margin: 0 10px 0 10px;
+            color: #999591;
+
+        }
+    }
 `;

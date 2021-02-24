@@ -18,9 +18,7 @@ export const Form = styled(Unform)`
   button {
     margin-top: 48px;
     align-self: flex-end;
-  }
 
-  button {
     font-weight: 600;
     border-radius: 8px;
     border: 0;

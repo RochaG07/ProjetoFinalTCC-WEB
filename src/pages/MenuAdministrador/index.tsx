@@ -101,7 +101,7 @@ const MenuAdministrador: React.FC = () => {
     return(
       <Container>
         <Header />
-        <Navbar />
+        <Navbar/>
         <Content>
           {
             mostrarCadastrarJogo&&

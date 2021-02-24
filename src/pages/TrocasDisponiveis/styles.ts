@@ -20,10 +20,11 @@ export const Content = styled.div`
 
 export const Troca = styled.div`
     margin-top: 35px;
-    border-radius: 5px;
+    border-radius: 10px;
 	height : 220px;
-    background-color: #68a;
+    background-color: #123;
     box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+    border: 2px solid #123;
 
     width: 92%;
 
@@ -31,7 +32,10 @@ export const Troca = styled.div`
     justify-content: center;
 
     &:hover{
-        background: ${shade(0.2, '#68a')};
+        //background: ${shade(0.2, '#68a')};
+
+        border: 2px solid #68a;
+
         cursor: pointer;
     }
         
@@ -58,7 +62,7 @@ export const Troca = styled.div`
         align-items: center;
         margin: 10px 0 10px 0;
 
-        background-color: #123;
+        background-color: ${shade(0.2, '#123')};
         border-radius: 5px;
 
         img{
@@ -80,4 +84,10 @@ export const Troca = styled.div`
 `;
 
 export const Filtro = styled(Form)`
-`;
+    background-color: ${shade(0.8, '#123')};
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+`;  

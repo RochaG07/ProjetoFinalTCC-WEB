@@ -197,7 +197,7 @@ const MeuPerfil: React.FC = () => {
     return(
         <Container>
             <Header />
-            <Navbar />
+            <Navbar selectedPage={'meu-perfil'}/>
             <Content>
                 <Form ref={ formRef } initialData={{
                     username: usuario.username,

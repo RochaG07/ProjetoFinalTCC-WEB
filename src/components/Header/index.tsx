@@ -1,8 +1,8 @@
-import React,{ useState, useCallback } from 'react';
+import React,{ useState, useCallback, useEffect } from 'react';
 
 import {useAuth} from '../../hooks/auth';
 import { FiPower, FiBell, FiUserCheck } from 'react-icons/fi';
-import { Container, HeaderContent, Profile } from './styles';
+import { Container, HeaderContent, Profile, Aviso } from './styles';
 import Countdown from 'react-countdown';
 
 import Tippy from '@tippyjs/react';
@@ -10,6 +10,9 @@ import 'tippy.js/dist/tippy.css';
 
 import { addWeeks } from 'date-fns';
 import { useHistory } from 'react-router-dom';
+import api from '../../services/api';
+
+import {socket, chatSocket} from '../../services/socket';
 
 interface IRenderer{
     days: number,
@@ -19,16 +22,33 @@ interface IRenderer{
     completed: boolean,
 }
 
+interface IAviso{
+    id: string,
+    titulo: string,
+    conteudo: string,
+    dataEnvio: Date,
+}
+
 const Header: React.FC = ({ children, ...rest }) => {
     const [showNotificacoesMenu, setShowNotificacoesMenu] = useState(false);
 
     const {usuario, logout, atualizaUsuario} = useAuth();
+
     const history = useHistory();
+
+    const [avisos, setAvisos] = useState<IAviso[]>([]);
 
     const [trocasDisponiveis, setTrocasDisponiveis] = useState<number>(usuario.trocasDisponiveis);
     const [proxTrocaDisp, setProxTrocaDisp] = useState<Date | null>(usuario.proxTrocaDisp);
 
     const [key, setKey] = useState<number>(0);
+
+    useEffect(()=>{
+        api.get<IAviso[]>('/admin/avisos')
+        .then(response => {
+            setAvisos(response.data);
+        })
+    }, [])
 
     const handleRender = ({ days, hours, minutes, seconds, completed }: IRenderer) => {
         return (
@@ -63,12 +83,26 @@ const Header: React.FC = ({ children, ...rest }) => {
         setKey(key + 1);
     },[setKey, key, usuario, atualizaUsuario, proxTrocaDisp, trocasDisponiveis]);
 
+
     function toggleNotificacoes():void{
         setShowNotificacoesMenu(!showNotificacoesMenu);
     };  
 
     function handleAdmin():void{
         history.push('/admin');
+    };  
+
+    
+    function handleSair():void{
+        //Reconecta do socket de chat
+        chatSocket.disconnect();
+        chatSocket.connect();
+
+        //Reconectar do socket comum
+        socket.disconnect();
+        socket.connect();
+
+        logout();
     };  
 
     return(
@@ -116,17 +150,20 @@ const Header: React.FC = ({ children, ...rest }) => {
                            usuario.possuiStatusDeAdm &&
                             <button className='adm' type='button' onClick={handleAdmin}>
                                 <FiUserCheck className='admIcon'/>
-                            </button>
-                             
-                        }
-                        
-                        <Tippy visible={showNotificacoesMenu}  content='TODO'>
+                            </button>    
+                        }               
+                    
+                        <Tippy visible={showNotificacoesMenu}  content={
+                            avisos.map(aviso => (
+                                <Aviso key={aviso.id}><span>{'<'+aviso.dataEnvio+'>'}</span><span>{aviso.titulo}</span>: {aviso.conteudo}</Aviso>
+                            ))
+                        }>
                             <button className='sino' type='button' onClick={toggleNotificacoes}>
                                 <FiBell />
                             </button>
                         </Tippy>
-                       
-                        <button className='sair' type='button' onClick={logout}>
+
+                        <button className='sair' type='button' onClick={handleSair}>
                             <FiPower />
                         </button>
                     </div>

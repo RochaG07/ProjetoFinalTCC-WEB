@@ -10,10 +10,10 @@ import { useToast } from '../../hooks/toast';
 import { Link, useHistory } from 'react-router-dom';
 import getValidationErrors from '../../utils/getValidationErrors';
 
-//import logoImg from '../../assets/logo.svg';
-
 import Input from '../../components/Input';
 import Button from '../../components/Button';
+
+import {socket} from '../../services/socket';
 
 import { Container, Content, AnimationContainer } from './styles';
 
@@ -30,8 +30,9 @@ const Login: React.FC = () => {
 
     const history = useHistory();
 
-    const handleSubmit = useCallback(async (data: LoginFormData) => {    
+    const handleSubmit = useCallback(async (data: LoginFormData) => {  
         try {
+
             formRef.current?.setErrors({});
 
             //schema -> Utilizado para fazer a validação em um objeto
@@ -44,13 +45,17 @@ const Login: React.FC = () => {
                 abortEarly: false,
             });
 
-            await login({
+            login({
                 username: data.username,
                 senha: data.senha,
-            });
+            })
+            .then( usuario => {
+                socket.emit('login', usuario.id);
+            })
+
 
             history.push('/trocas-disponiveis');
-            
+
         } catch (err) {
 
             // Verifica se o erro foi na validação

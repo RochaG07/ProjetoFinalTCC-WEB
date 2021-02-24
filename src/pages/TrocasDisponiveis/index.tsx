@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState} from 'react';
 
 import { useToast } from '../../hooks/toast';
 
@@ -6,7 +6,6 @@ import Header from '../../components/Header';
 import Navbar from '../../components/Navbar';
 
 import { FiArrowRightCircle } from 'react-icons/fi';
-
 
 import { Container, Content, Troca, Filtro} from './styles';
 
@@ -68,7 +67,6 @@ interface IOptionsJogos{
 }
 
 const NovaTroca: React.FC = () => {
-
     const { addToast } = useToast();
 
     const [modalOpen, setModalOpen] = useState(false);
@@ -236,7 +234,7 @@ const NovaTroca: React.FC = () => {
     return(
         <Container>          
             <Header/>  
-            <Navbar/>   
+            <Navbar selectedPage='trocas-disponiveis'/>   
             <Content>
                 <Filtro ref={formRef} onSubmit={handleAplicarFiltros}>
                     <Select 

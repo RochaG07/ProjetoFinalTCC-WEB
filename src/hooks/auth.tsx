@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useState, useContext } from 'react';
 import api from '../services/api';
+import {socket} from '../services/socket';
 
 interface Usuario {
     id: string;
@@ -31,7 +32,7 @@ interface LoginCredentials {
 
 interface AuthContextData {
     usuario: Usuario;
-    login(credentials: LoginCredentials): Promise<void>;
+    login(credentials: LoginCredentials): Promise<Usuario>;
     logout(): void;
     atualizaUsuario(usuario: Usuario): void;
 }
@@ -56,9 +57,12 @@ const AuthProvider: React.FC = ({ children }) => {
         if(token && usuario) {
             api.defaults.headers.authorization = `Bearer ${token}`;
 
+            //Reloga o usuário com um novo socket.id
+            //TODO mover a lógica de relogar o usuário no servidor ws para um lugar mais relevante 
+            socket.emit('login', JSON.parse(usuario).id);
+
             return { token, usuario: JSON.parse(usuario) };
         }
-
 
         return {} as AuthState;
     });
@@ -83,11 +87,15 @@ const AuthProvider: React.FC = ({ children }) => {
         api.defaults.headers.authorization = `Bearer ${token}`;
 
         setData({ token, usuario });
+
+        return usuario;
     }, []);
 
     const logout = useCallback(() => {
         localStorage.removeItem('@TCC:token');
         localStorage.removeItem('@TCC:usuario');
+
+        //socket.disconnect();
 
         setData({} as AuthState);
     }, []);

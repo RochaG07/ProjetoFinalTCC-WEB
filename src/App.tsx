@@ -15,7 +15,7 @@ const stripePromise = loadStripe('pk_test_51Ha6nzB0QexI4OApFmIQ6ijwOseWzSpEUyrxv
 const App: React.FC = () => (
     <Elements stripe={stripePromise}>
         <Router>
-
+  
         <AppProvider>
           <Routes />
         </AppProvider>

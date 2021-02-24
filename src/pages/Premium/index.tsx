@@ -44,7 +44,7 @@ const Premium: React.FC = () => {
     return(
       <Container>
         <Header />
-        <Navbar />
+        <Navbar selectedPage={'premium'}/>
         <Content>
           <ModalAssinatura
           isOpen={modalOpen}
@@ -58,7 +58,7 @@ const Premium: React.FC = () => {
     return(
       <Container>
         <Header />
-        <Navbar />
+        <Navbar selectedPage={'premium'}/>
         <Content>
           <h1>Usuário premium</h1>
           <Button onClick={handleMudarMetodoDePagamento}>Mudar método de pagamento</Button>

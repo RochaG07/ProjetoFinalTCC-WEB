@@ -30,6 +30,10 @@ const ModalEnviarAviso: React.FC<IModalProps> = ({
   const handleSubmit = useCallback( async (data: IEnviarAviso) => {
     try{
 
+      //TODO se usuário que irá recever o aviso
+      // estiver na lista de usuários logados no websocket, 
+      // enviar o novo aviso pelo websocket(emit)
+
       await api.post('admin/avisos', data);
 
       addToast({

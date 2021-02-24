@@ -163,7 +163,7 @@ const TrocasDisponiveis: React.FC = () => {
     return(
         <Container>          
             <Header/>    
-            <Navbar/>   
+            <Navbar selectedPage={'nova-troca'}/>   
             <Content>
                 <Form ref={ formRef } onSubmit={handleSubmit}>
                     <Capas>

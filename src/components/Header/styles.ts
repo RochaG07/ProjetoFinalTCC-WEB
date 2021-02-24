@@ -119,3 +119,6 @@ export const MenuAdm = styled.ul`
         background: ${shade(0.2, '#68a')}
     }
 `;
+
+export const Aviso = styled.p`
+`;
