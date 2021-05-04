@@ -2,15 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 import ReactModal from 'react-modal';
 
-interface IFoodPlate {
-  id: number;
-  name: string;
-  image: string;
-  price: string;
-  description: string;
-  available: boolean;
-}
-
 interface IModalProps {
   children: any;
   isOpen: boolean;
@@ -22,6 +13,8 @@ const Modal: React.FC<IModalProps> = ({ children, isOpen, setIsOpen }) => {
 
   useEffect(() => {
     setModalStatus(isOpen);
+
+    isOpen? document.body.style.overflow = 'hidden' :  document.body.style.overflow = 'unset';
   }, [isOpen]);
 
   return (
@@ -40,9 +33,9 @@ const Modal: React.FC<IModalProps> = ({ children, isOpen, setIsOpen }) => {
           transform: 'translate(-50%, -50%)',
           background: '#24292E',
           color: '#000000',
-          borderRadius: '8px',
+          borderRadius: '5px',
           width: '736px',
-          border: 'none',
+          border: '4px solid #68a',
         },
         overlay: {
           backgroundColor: '#121214e6',

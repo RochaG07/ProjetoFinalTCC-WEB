@@ -2,7 +2,10 @@ import { createGlobalStyle } from 'styled-components';
 
 import BG from '../assets/dark-mosaic.png';
 
-export default createGlobalStyle`
+import "@fontsource/roboto-slab" 
+
+export default createGlobalStyle`   
+
     * {
         margin: 0;
         padding: 0;
@@ -15,10 +18,24 @@ export default createGlobalStyle`
         background-image : url(${BG});
 
         -webkit-font-smoothing: antialiased;
+
+        
+        ::-webkit-scrollbar {
+        width: 16px;
+        }
+        ::-webkit-scrollbar-track {
+        background: #2f363d; 
+        }
+        ::-webkit-scrollbar-thumb {
+        background: #123; 
+        }
+        ::-webkit-scrollbar-thumb:hover {
+        background: #68a; 
+        }
     }
 
     body, input, button {
-        font-family: 'Roboto Slab', serif;
+        font-family: 'Roboto Slab', sans-serif;
         font-size: 16px;
     }
 

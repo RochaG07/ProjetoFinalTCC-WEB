@@ -1,25 +1,11 @@
 import React, { useRef, useCallback } from 'react';
 
-import { FiSend, FiArrowRightCircle } from 'react-icons/fi';
+import { FiSend } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from './styles';
 import Modal from '../Modal';
 import Input from '../Input';
-import { IHandleEnviarConvite } from '../../pages/TrocasDisponiveis';
-
-interface ITroca {
-  id: string,
-  descricao: string,
-  ativo: boolean,
-  nomeJogoOfertado: string,
-  nomeJogoDesejado: string,
-  urlDaCapaJogoOfertado: string,
-  urlDaCapaJogoDesejado: string,
-  nomeConsoleJogoOfertado: string,
-  nomeConsoleJogoDesejado: string,
-  estado: string,
-  municipio: string,
-}
+import { IHandleEnviarConvite, ITroca } from '../../pages/TrocasDisponiveis';
 
 interface IModalProps {
   isOpen: boolean;
@@ -53,20 +39,26 @@ const ModalTrocaDisponivel: React.FC<IModalProps> = ({
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <Form ref={formRef} onSubmit={handleSubmit} initialData={trocaSelecionada}>
 
-        <div className='capas'>
+        <div id='capas'>
           <img src={trocaSelecionada.urlDaCapaJogoOfertado} alt={trocaSelecionada.nomeJogoOfertado} />
-          <FiArrowRightCircle/>
           <img src={trocaSelecionada.urlDaCapaJogoDesejado} alt={trocaSelecionada.nomeJogoDesejado} />
         </div>
+        <div id='descricao'>
+          <h1>Troca de {trocaSelecionada.username}</h1>
+          <p>{trocaSelecionada.descricao}</p>
+          <p id='estadoMunicipio'>{trocaSelecionada.estado} - {trocaSelecionada.municipio}</p>
+        </div>
 
-        <Input name="mensagem" placeholder="Mensagem do convite *opcional" />
+        <div id='enviar'>
+          <Input  name="mensagem" placeholder="Mensagem para o convite *opcional" />
 
-        <button type="submit">
-          <div className="text">Enviar convite</div>
-          <div className="icon">
-            <FiSend size={24} />
-          </div>
-        </button>
+          <button type="submit">
+            <div id="text">Enviar convite</div>
+            <div id="icon">
+              <FiSend size={24} />
+            </div>
+          </button>
+        </div>
       </Form>
     </Modal>
   );

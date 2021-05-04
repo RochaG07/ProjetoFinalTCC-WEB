@@ -3,19 +3,21 @@ import { Link } from 'react-router-dom';
 import { lighten, shade } from 'polished';
 
 interface NavbarLinkProps {
-    isSelected?: boolean;
+    isselected: boolean ;
 }
 
-const appearFromLeft = keyframes`
-    from {
-        transform: translateX(-20px);
-    }
-    to {
+const slide = keyframes`
+    0%, 100% {
         transform: translateX(0);
+    }
+    50% {
+        transform: translateX(20px);
     }
 `;
 
 export const Container = styled.div`
+    display: flex;
+    flex-direction: row;
 `;
 
 export const Links = styled.nav`
@@ -24,12 +26,13 @@ export const Links = styled.nav`
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-    width: 9.4rem;
+    //width: 10em;
 
-    padding: 1.3rem;
+    padding-left: 0.9em;
     position: absolute;
     left: 0;
 `;
+
 
 export const NavbarLink= styled(Link)<NavbarLinkProps>`
     color: #999591;
@@ -56,10 +59,10 @@ export const NavbarLink= styled(Link)<NavbarLinkProps>`
     } 
 
     ${(props) => 
-        props.isSelected && 
+        props.isselected && 
         css`
             background: ${lighten(0.03, '#123')};
-            animation: ${appearFromLeft} 1s;
+            animation: ${slide} 0.8s;
         `}
 
 

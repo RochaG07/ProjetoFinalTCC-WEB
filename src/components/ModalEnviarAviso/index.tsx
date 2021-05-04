@@ -1,13 +1,14 @@
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback } from 'react';
 
-import { FiSend, FiArrowRightCircle } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from './styles';
 import Modal from '../Modal';
 import Input from '../Input';
 import Button from '../../components/Button';
 import api from '../../services/api';
+
 import { useToast } from '../../hooks/toast';
+import { socket } from '../../services/socket';
 
 interface IModalProps {
   isOpen: boolean;
@@ -27,14 +28,22 @@ const ModalEnviarAviso: React.FC<IModalProps> = ({
   const formRef = useRef<FormHandles>(null);
   const { addToast } = useToast();
 
-  const handleSubmit = useCallback( async (data: IEnviarAviso) => {
+  const handleSubmit = useCallback( async ({username, titulo, conteudo}: IEnviarAviso) => {
     try{
+      await api.post('admin/avisos', {username, titulo, conteudo});
 
-      //TODO se usuário que irá recever o aviso
-      // estiver na lista de usuários logados no websocket, 
-      // enviar o novo aviso pelo websocket(emit)
-
-      await api.post('admin/avisos', data);
+      api.post('admin/avisos', {username, titulo, conteudo})
+      .then(response => {
+          socket.emit('apresentar novo aviso', {
+              id: response.data.id,
+              titulo: response.data.titulo,
+              conteudo: response.data.conteudo,
+              idUserAlvo: response.data.idUser,
+          });
+      })
+      .catch((err) => {
+          console.log(err);
+      });
 
       addToast({
         type: "success",

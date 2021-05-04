@@ -17,7 +17,7 @@ import { Container, Content, Capas, Ofertado, Desejado} from './styles';
 
 import api from '../../services/api';
 
-import { addWeeks } from 'date-fns';
+import { addWeeks, isBefore, parseISO } from 'date-fns';
 import { FormHandles } from '@unform/core';
 import getValidationErrors from '../../utils/getValidationErrors';
 import { useHistory } from 'react-router-dom';
@@ -40,7 +40,7 @@ interface IOptionsJogos{
     label: string,
     value: string,
     capa_url: string,
-    consoles: string[]
+    consoles: string[],
 }
 
 const TrocasDisponiveis: React.FC = () => {
@@ -69,7 +69,7 @@ const TrocasDisponiveis: React.FC = () => {
                         label: jogo.nome,
                         value: jogo.id,
                         capa_url: jogo.capa_url,
-                        consoles: jogo.consoles,
+                        consoles: jogo.consoles
                 })));
             })  
         }
@@ -80,14 +80,13 @@ const TrocasDisponiveis: React.FC = () => {
     //Utiliza como base o array dos jogos preenchido anteriormente e 
     //forma um novo com o formato pedido pelo react-select  
 
-    const handleSubmit = useCallback(async (formData) => {
-
+    const handleSubmit = useCallback(async (dataForm) => {
         const data = {
-            idJogoOfertado: formData.jogoOfertado,
-            idJogoDesejado: formData.jogoDesejado,
-            consoleJogoOfertado: formData.consolesDoJogoDesejado,
-            consoleJogoDesejado: formData.consolesDoJogoDesejado,
-            descricao: formData.descricao,
+            idJogoOfertado: dataForm.jogoOfertado,
+            idJogoDesejado: dataForm.jogoDesejado,
+            consoleJogoOfertado: dataForm.consolesDoJogoDesejado,
+            consoleJogoDesejado: dataForm.consolesDoJogoDesejado,
+            descricao: dataForm.descricao,
         }
         
         try{
@@ -105,7 +104,20 @@ const TrocasDisponiveis: React.FC = () => {
             
             await api.post('/trocas', data);
 
-            if(!usuario.premiumAtivo){
+            let deveCobrarTrocasDisponiveis = true;
+
+            if(usuario.statusPremium === 'ativo'){
+                deveCobrarTrocasDisponiveis = false;
+            }
+            else if(usuario.statusPremium === 'cancelado' && usuario.premiumExpiracao){
+                const dataAtual = new Date(Date.now());
+
+                if(isBefore(dataAtual, parseISO(usuario.premiumExpiracao.toString()))){
+                    deveCobrarTrocasDisponiveis = false;
+                }
+            }
+
+            if(deveCobrarTrocasDisponiveis){
                 let proxTrocaDisp = usuario.proxTrocaDisp;
 
                 if(!proxTrocaDisp){

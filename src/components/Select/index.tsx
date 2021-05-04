@@ -12,19 +12,24 @@ interface Props extends SelectProps<OptionTypeBase> {
 const customStyles = {
   option: (provided: any, state: any) => ({
     ...provided,
-
+    backgroundColor: state.isSelected ? '#68a' : '#fff',
   }),
   control: () => ({
     // none of react-select's styles are passed to <Control />
     display: 'flex',
+    alignItems: 'center',
 
-    width: 200,
-    background:'#1c2024',
+    width: '100%',
     borderRadius: 10,
-    padding: 6,
-  }),
+    padding: 10,
 
+    backgroundColor: '#1c2024',
+
+    marginBottom: 9,
+    color: '#000',
+  }),
 }
+
 
 const Select: React.FC<Props> = ({ name, ...rest }) => {
   const selectRef = useRef(null);

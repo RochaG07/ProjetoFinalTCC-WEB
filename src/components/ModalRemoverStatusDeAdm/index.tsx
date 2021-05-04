@@ -13,34 +13,34 @@ interface IModalProps {
   setIsOpen: () => void;
 }
 
-interface ICriarJogoFormData {
-  nome: string,
+interface IAtribuirStatusDeAdminFormData {
+  username: string,
 }
 
-const ModalCadastrarConsole: React.FC<IModalProps> = ({
+const ModalRemoverStatusDeAdm: React.FC<IModalProps> = ({
   isOpen,
   setIsOpen,
 }) => {
   const formRef = useRef<FormHandles>(null);
   const { addToast } = useToast();
 
-  const handleSubmit = useCallback( async (dataForm: ICriarJogoFormData) => {
-    try{
-      //TODO: cadastrar um novo console não atualiza a lista de consoles disponíveis no cadastro de jogos
-      
-      await api.post('/jogos/consoles', dataForm);
+  const handleSubmit = useCallback( async (data: IAtribuirStatusDeAdminFormData) => {
+    try{      
+      await api.delete(`/admin/${data.username}`);
 
       addToast({
         type: "success",
-        title: "Cadastro realizado",
-        description: "Jogo cadastrado com sucesso",
+        title: "Status de admin removido",
+        description: "Status de admin removido com sucesso",
       });
     } catch(err) {
 
+      console.log(err);
+
       addToast({
         type: 'error',
-        title: 'Erro no cadastro',
-        description: 'Ocorreu um erro ao fazer cadastro do jogo'
+        title: 'Erro ao remover status de admin',
+        description: 'Ocorreu um erro ao remover status de admin'
       });
     }
 
@@ -50,12 +50,12 @@ const ModalCadastrarConsole: React.FC<IModalProps> = ({
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <Form onSubmit={handleSubmit} ref={formRef}>
-        <Input name='nome' placeholder='Nome do Console'></Input>
+        <Input name='username' placeholder='Nome de usuário'></Input>
 
-        <Button type="submit">Cadastrar console</Button>
+        <Button type="submit">Remover status de Admin</Button>
       </Form>
     </Modal>
   );
 };
 
-export default ModalCadastrarConsole;
+export default ModalRemoverStatusDeAdm;

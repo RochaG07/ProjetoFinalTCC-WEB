@@ -1,5 +1,7 @@
 import styled from 'styled-components';
-import { lighten} from 'polished';
+import { lighten } from 'polished';
+
+import arrow from '../../assets/pngkey.com-arrow-icon-png-120716.png';
 
 export const Container = styled.div`
 `;
@@ -14,38 +16,40 @@ export const Content = styled.div`
 	margin-right : 14%;
 
     background-color: #181b1f;
-
-
 `;
 
 export const Troca = styled.div`
     margin-top: 35px;
     border-radius: 5px;
 	height : 220px;
-    background-color: #68a;
+    background-color: ${lighten(0.05, '#68a')};
     box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
-    border: 2px solid #68a;
+    border: 4px solid #68a;
 
     width: 92%;
 
     display: flex;
     justify-content: center;
-
-
         
     div.specJogo{
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        vertical-align: middle;
+        margin: auto;
+
+        color: #123;
 
         h1{
-            font-size: 35px;
-            color: #123;
-        }
+            font-size: 1.6em;
+            font-weight: 300;
+        }   
+
         p{
-            font-size: 15px;
-            color: #123;
+            font-size: 1em;
+            font-weight: 100;
+        }
+        
+        #por{
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0 15px 0;
         }
     }
 
@@ -53,7 +57,10 @@ export const Troca = styled.div`
         display: flex;
         flex-direction: row;
         align-items: center;
-        margin: 10px 0 10px 0;
+
+        background-image: url(${arrow});
+        background-repeat: no-repeat;
+        background-position: center;
 
         img{
 
@@ -63,11 +70,8 @@ export const Troca = styled.div`
             margin: 0 10px 0 10px;
         }
 
-        svg{
-            height: 80px;
-            width: 50px;
-            margin: 0 10px 0 10px;
-            color: #999591;
+        img:first-child{
+            margin-right: 20%;
         }
     }
 
@@ -75,6 +79,8 @@ export const Troca = styled.div`
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: space-between;
+
         margin-top: 10px;
         margin-right: 10px;
 
@@ -99,7 +105,4 @@ export const Troca = styled.div`
         } 
 
     }
-
-
-
 `;

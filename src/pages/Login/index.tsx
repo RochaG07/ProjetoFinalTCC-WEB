@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import { FiLogIn, FiLock, FiUser} from 'react-icons/fi';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
@@ -7,7 +7,7 @@ import * as Yup from 'yup';
 import { useAuth } from '../../hooks/auth';
 import { useToast } from '../../hooks/toast';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import getValidationErrors from '../../utils/getValidationErrors';
 
 import Input from '../../components/Input';
@@ -28,11 +28,12 @@ const Login: React.FC = () => {
     const { login } = useAuth();
     const { addToast } = useToast();
 
-    const history = useHistory();
+    const [carregando, setCarregando] = useState<boolean>(false);
 
     const handleSubmit = useCallback(async (data: LoginFormData) => {  
-        try {
+        setCarregando(true);
 
+        try {
             formRef.current?.setErrors({});
 
             //schema -> Utilizado para fazer a validação em um objeto
@@ -50,13 +51,27 @@ const Login: React.FC = () => {
                 senha: data.senha,
             })
             .then( usuario => {
-                socket.emit('login', usuario.id);
+                const loginData = {
+                    idUser: usuario.id, 
+                    nome: usuario.nome
+                };
+
+                socket.emit('login', loginData);
+                
             })
-
-
-            history.push('/trocas-disponiveis');
-
+            .catch(() => {
+                addToast({
+                    type: 'error',
+                    title: 'Erro no login',
+                    description: 'Combinação de username/senha inválido'
+                });
+            })
+            .finally(() => {
+                setCarregando(false);
+            })
         } catch (err) {
+
+            setCarregando(false);
 
             // Verifica se o erro foi na validação
             if(err instanceof Yup.ValidationError) {
@@ -66,16 +81,16 @@ const Login: React.FC = () => {
                 // ? -> Serve para verificar se a variável existe para então chamar a função setErrors (optional chaining)
                 formRef.current?.setErrors({errors});
 
+                addToast({
+                    type: 'error',
+                    title: 'Erro no login',
+                    description: 'Preencher todos os campos'
+                });
+
                 return;
             }
-
-            addToast({
-                type: 'error',
-                title: 'Erro na autenticação',
-                description: 'Ocorreu um erro ao fazer login'
-            });
         }
-    }, [login, addToast, history]);
+    }, [login, addToast]);
 
     return(
         <Container>
@@ -88,7 +103,7 @@ const Login: React.FC = () => {
 
                         <Input name="senha" icon={FiLock} type="password" placeholder="Senha"/>
 
-                        <Button type="submit">Entrar</Button>
+                        <Button loading={carregando} type="submit">Entrar</Button>
 
                         <Link to="/esqueci-minha-senha">Esqueci minha senha</Link>
                     </Form>

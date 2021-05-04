@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import {saturate, shade} from 'polished';
+import {saturate, lighten} from 'polished';
 
 export const Container = styled.header`
     padding: 32px 0;
@@ -19,8 +19,6 @@ export const HeaderContent = styled.div`
     div.icones {
         margin-left: auto;
 
-
-
         button {
         background: transparent;
         border: 0;
@@ -31,27 +29,22 @@ export const HeaderContent = styled.div`
                 width: 20px;
                 height: 20px;
             } 
-            svg.admIcon {
-                color: #b58435;
-            } 
-
         }
 
-        button.adm :hover{
-            color: ${saturate(0.8, '#b58435')}
+        button.sino :hover {
+            color: ${saturate(0.4, '#68a')};
+        }
+
+        button.sair{
+            margin-left: 4em;
         }
 
         button.sair :hover {
             color: red;
         }
 
-        button.sino :hover {
-            color: ${saturate(0.4, '#68a')};
-        }
     }
 `;
-
-
 
 export const Profile = styled.div`
     display: flex;
@@ -85,40 +78,45 @@ export const Profile = styled.div`
 
     }
 
-
     strong {
         color: #68a;
     }
 `;
 
-export const MenuAdm = styled.ul`
-    
-    list-style-type:none;
+export const ContainerAvisoNotificacao = styled.div`
+    border-radius: 2px;
+    padding: 4px;
+    background-color: #68a;
+    width: 92%;
 
-    li{
-        
-    }
+    margin: auto;
 
-    button{
-        background: #68a;
-        height: 30px;
-        border-radius: 10px;
-        border: 0;
-        padding: 0 5px;
-        color: #fff;
-        width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 2px;
+    cursor: pointer; 
+
+    #titulo{
+        color: #1c2024;
         font-weight: 500;
-        margin-top: 5px;
-
-        transition: background-color 0.2s;
-
+        font-size: 1.2em;
     }
 
-
-    button :hover { 
-        background: ${shade(0.2, '#68a')}
+    #conteudo{
+        color: #1c2024;
+        font-weight: 300;
     }
-`;
 
-export const Aviso = styled.p`
+    #data{
+        color: ${lighten(0.2, '#1c2024')};
+        font-weight: 100;
+    }
+
+    :nth-child(even){
+        background-color: ${lighten(0.05, '#68a')};
+    }
+
+    :hover{
+        background-color: ${lighten(0.1, '#68a')};
+    }
 `;

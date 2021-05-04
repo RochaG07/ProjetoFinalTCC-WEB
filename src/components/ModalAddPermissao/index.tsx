@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useState, useEffect, ChangeEvent } from 'react';
+import React, { useRef, useCallback } from 'react';
 
 import { FormHandles } from '@unform/core';
 import { Form } from './styles';
@@ -19,11 +19,6 @@ interface IAddPermissaoFormData {
   permissoes: string[],
 }
 
-interface IOptions{
-  label: string,
-  value: string,
-}
-
 const ModalAddPermissao: React.FC<IModalProps> = ({
   isOpen,
   setIsOpen,
@@ -33,7 +28,6 @@ const ModalAddPermissao: React.FC<IModalProps> = ({
   
   const handleSubmit = useCallback( async (data: IAddPermissaoFormData) => {
     try{      
-
       await api.post('/admin/permissoes', data);
 
       addToast({
@@ -64,10 +58,13 @@ const ModalAddPermissao: React.FC<IModalProps> = ({
           name="permissoes"
           options={[
             {label: 'Cadastrar jogos',value:'cadastrar_jogos'},
-            {label: 'Cadastrar consoles',value:'cadastrar_consoles'},
+            {label: 'Remover jogos',value:'remover_jogos'},
+            {label: 'Cadastrar consoles',value:'remover_consoles'},
+            {label: 'Remover consoles',value:'cadastrar_consoles'},
             {label: 'Enviar avisos',value:'enviar_avisos'},
             {label: 'Adicionar permissoes',value:'add_permissoes'},
             {label: 'Atribuir status de admin',value:'atribuir_status_de_admin'},
+            {label: 'Remover status de admin',value:'desativar_status_de_admin'},
           ]}
         />
 

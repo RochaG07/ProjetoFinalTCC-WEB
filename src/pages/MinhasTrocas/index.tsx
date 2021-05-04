@@ -3,14 +3,18 @@ import React, { useEffect, useState} from 'react';
 import Header from '../../components/Header';
 import Navbar from '../../components/Navbar';
 
-import { FiArrowRightCircle, FiInbox, FiX } from 'react-icons/fi';
+import { FiInbox, FiX } from 'react-icons/fi';
 
 import { Container, Content, Troca} from './styles';
+
 import ModalConvites from '../../components/ModalConvites';
 import { Badge } from '@material-ui/core';
 
-import api from '../../services/api';
+import { confirmAlert } from 'react-confirm-alert';
+import '../../styles/react-confirm-alert.css'
+import ConfirmAlert from '../../components/ConfirmAlert';
 
+import api from '../../services/api';
 
 interface ITrocaENumDeConvites{
     troca: ITroca,
@@ -27,20 +31,12 @@ interface ITroca {
     urlDaCapaJogoDesejado: string,
     nomeConsoleJogoOfertado: string,
     nomeConsoleJogoDesejado: string,
+    estado: string,
+    municipio: string,
 }
 
 interface IMostrarConvites{
     idTroca: string,
-}
-
-interface IConvite {
-    id: string,
-    mensagem: string,
-    foiAceito: boolean,
-    dataEnvio: Date,
-    dataResposta: Date,
-    idUser_solicitador: string,
-    nome_solicitador: string,
 }
 
 const Negociacoes: React.FC = () => {
@@ -48,6 +44,8 @@ const Negociacoes: React.FC = () => {
     const [idTrocaSelecionada, setIdTrocaSelecionada] = useState<string | null>();
 
     const [trocas, setTrocas] = useState<ITrocaENumDeConvites[]>([]);
+
+
 
     useEffect(() => {
         async function loadTrocas(): Promise<void> {
@@ -61,10 +59,26 @@ const Negociacoes: React.FC = () => {
     }, []);
 
     async function handleDesativarTroca(idTroca: string): Promise<void> {
-        api.delete(`/trocas/${idTroca}`);
+        confirmAlert({
+            customUI: ({ onClose }) => {
+              return(
+                <ConfirmAlert 
+                    descricao='Realmente deletar esta troca?'
+                    onClose={onClose} 
+                    yesFunction={()=>{
+                        api.delete(`/trocas/${idTroca}`);
 
-        setTrocas(trocas.filter(troca => troca.troca.id !== idTroca));
+                        setTrocas(trocas.filter(troca => troca.troca.id !== idTroca));
+            
+                        onClose();
+                    }}
+                />
+              );
+            }
+        });
     }
+    
+    
 
     function handleMostrarConvites({idTroca}: IMostrarConvites): void {
         setIdTrocaSelecionada(idTroca);
@@ -105,14 +119,13 @@ const Negociacoes: React.FC = () => {
                     <Troca  key={troca.troca.id}>
                         <div className='capas'>
                             <img src={troca.troca.urlDaCapaJogoOfertado} alt={troca.troca.nomeJogoOfertado} />
-                            <FiArrowRightCircle/>
                             <img src={troca.troca.urlDaCapaJogoDesejado} alt={troca.troca.nomeJogoDesejado} />
                         </div>
+
                         <div className='specJogo'>
                             <h1>{troca.troca.nomeJogoOfertado}</h1>
                             <p>{troca.troca.nomeConsoleJogoOfertado}</p>
-                        </div>
-                        <div className='specJogo'>
+                            <p id='por'>por</p>
                             <h1>{troca.troca.nomeJogoDesejado}</h1>
                             <p>{troca.troca.nomeConsoleJogoDesejado}</p>
                         </div>
@@ -129,6 +142,8 @@ const Negociacoes: React.FC = () => {
                                     <FiInbox/>
                                 </button>
                             </Badge>
+
+                            <p>{troca.troca.estado} - {troca.troca.municipio}</p>
                         </div>
                     </Troca>
                 ))

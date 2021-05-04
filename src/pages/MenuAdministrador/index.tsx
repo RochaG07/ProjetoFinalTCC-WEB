@@ -8,10 +8,14 @@ import Header from '../../components/Header';
 import Navbar from '../../components/Navbar';
 
 import ModalCadastrarJogo from '../../components/ModalCadastrarJogo';
+import ModalDeletarJogo from '../../components/ModalDeletarJogo';
 import ModalCadastrarConsole from '../../components/ModalCadastrarConsole';
+import ModalDeletarConsole from '../../components/ModalDeletarConsole';
+
 import ModalEnviarAviso from '../../components/ModalEnviarAviso';
 import ModalAddPermissao from '../../components/ModalAddPermissao';
 import ModalAtribuirStatusDeAdm from '../../components/ModalAtribuirStatusDeAdm';
+import ModalRemoverStatusDeAdm from '../../components/ModalRemoverStatusDeAdm';
 
 
 import { Container, Content } from './styles';
@@ -23,16 +27,26 @@ const MenuAdministrador: React.FC = () => {
     const { usuario } = useAuth();
 
     const [modalCadastrarJogoOpen, setModalCadastrarJogoOpen] = useState(false);
+    const [modalDeletarJogoOpen, setModalDeletarJogoOpen] = useState(false);
     const [modalCadastrarConsoleOpen, setModalCadastrarConsoleOpen] = useState(false);
+    const [modalDeletarConsoleOpen, setModalDeletarConsoleOpen] = useState(false);
+
     const [modalEnviarAvisoOpen, setModalEnviarAvisoOpen] = useState(false);
     const [modalAddPermissaoOpen, setModalAddPermissaoOpen] = useState(false);
+
     const [modalAtribuirStatusDeAdmOpen, setModalAtribuirStatusDeAdmOpen] = useState(false);
+    const [modalRemoverStatusDeAdmOpen, setModalRemoverStatusDeAdmOpen] = useState(false);
 
     const [mostrarCadastrarJogo, setMostrarCadastrarJogo] = useState(false);
+    const [mostrarDeletarJogo, setMostrarDeletarJogo] = useState(false);
     const [mostrarCadastrarConsole, setMostrarCadastrarConsole] = useState(false);
+    const [mostrarDeletarConsole, setMostrarDeletarConsole] = useState(false);
+
     const [mostrarEnviarAviso, setMostrarEnviarAviso] = useState(false);
     const [mostrarAddPermissao, setMostrarAddPermissao] = useState(false);
+
     const [mostrarAtribuirStatusDeAdm, setMostrarAtribuirStatusDeAdm] = useState(false);
+    const [mostrarRemoverStatusDeAdm, setMostrarRemoverStatusDeAdm] = useState(false);
 
 
     const history = useHistory();
@@ -49,8 +63,14 @@ const MenuAdministrador: React.FC = () => {
               case 'cadastrar_jogos':
                 setMostrarCadastrarJogo(true);
                 break;
+              case 'deletar_jogos':
+                setMostrarDeletarJogo(true);
+                break;
               case 'cadastrar_consoles':
                 setMostrarCadastrarConsole(true);
+                break;
+              case 'deletar_consoles':
+                setMostrarDeletarConsole(true);
                 break;
               case 'enviar_avisos':
                 setMostrarEnviarAviso(true);
@@ -61,6 +81,9 @@ const MenuAdministrador: React.FC = () => {
               case 'atribuir_status_de_admin':
                 setMostrarAtribuirStatusDeAdm(true);
                 break;
+              case 'desativar_status_de_admin':
+                setMostrarRemoverStatusDeAdm(true);
+                break;
             }
         })
       })
@@ -69,8 +92,14 @@ const MenuAdministrador: React.FC = () => {
     async function handleCadastrarJogo(): Promise<void> {
       toggleModalCadastrarJogo();
     }
+    async function handleDeletarJogo(): Promise<void> {
+      toggleModalDeletarJogo();
+    }
     async function handleCadastrarConsole(): Promise<void> {
       toggleModalCadastrarConsole();
+    }
+    async function handleDeletarConsole(): Promise<void> {
+      toggleModalDeletarConsole();
     }
     async function handleEnviarAviso(): Promise<void> {
       toggleModalEnviarAviso();
@@ -81,12 +110,21 @@ const MenuAdministrador: React.FC = () => {
     async function handleAtribuirStatusDeAdm(): Promise<void> {
       toggleModalAtribuirStatusDeAdm();
     }
+    async function handleRemoverStatusDeAdm(): Promise<void> {
+      toggleModalRemoverStatusDeAdm();
+    }
 
     function toggleModalCadastrarJogo(): void {
       setModalCadastrarJogoOpen(!modalCadastrarJogoOpen);
     }
+    function toggleModalDeletarJogo(): void {
+      setModalDeletarJogoOpen(!modalDeletarJogoOpen);
+    }
     function toggleModalCadastrarConsole(): void {
       setModalCadastrarConsoleOpen(!modalCadastrarConsoleOpen);
+    }
+    function toggleModalDeletarConsole(): void {
+      setModalDeletarConsoleOpen(!modalDeletarConsoleOpen);
     }
     function toggleModalEnviarAviso(): void {
       setModalEnviarAvisoOpen(!modalEnviarAvisoOpen);
@@ -97,11 +135,14 @@ const MenuAdministrador: React.FC = () => {
     function toggleModalAtribuirStatusDeAdm(): void {
       setModalAtribuirStatusDeAdmOpen(!modalAtribuirStatusDeAdmOpen);
     }
+    function toggleModalRemoverStatusDeAdm(): void {
+      setModalRemoverStatusDeAdmOpen(!modalRemoverStatusDeAdmOpen);
+    }
 
     return(
       <Container>
         <Header />
-        <Navbar/>
+        <Navbar selectedPage={'admin'}/>
         <Content>
           {
             mostrarCadastrarJogo&&
@@ -112,6 +153,17 @@ const MenuAdministrador: React.FC = () => {
               />
               
               <Button onClick={handleCadastrarJogo}>Cadastrar jogo</Button>
+            </>
+          }
+          {
+            mostrarDeletarJogo&&
+            <>
+              <ModalDeletarJogo
+              isOpen={modalDeletarJogoOpen}
+              setIsOpen={toggleModalDeletarJogo}
+              />
+              
+              <Button onClick={handleDeletarJogo}>Deletar jogo</Button>
             </>
           }
 
@@ -125,6 +177,18 @@ const MenuAdministrador: React.FC = () => {
               <Button onClick={handleCadastrarConsole}>Cadastrar console</Button>
             </>
           }
+          {
+            mostrarDeletarConsole&&
+            <>
+              <ModalDeletarConsole
+              isOpen={modalDeletarConsoleOpen}
+              setIsOpen={toggleModalDeletarConsole}
+              />
+              
+              <Button onClick={handleDeletarConsole}>Deletar console</Button>
+            </>
+          }
+
           {
             mostrarEnviarAviso&&
             <>
@@ -156,6 +220,17 @@ const MenuAdministrador: React.FC = () => {
               />
 
               <Button onClick={handleAtribuirStatusDeAdm}>Atribuir usuário status de admin</Button>
+            </>
+          }
+          {
+            mostrarRemoverStatusDeAdm&&
+            <>
+              <ModalRemoverStatusDeAdm
+              isOpen={modalRemoverStatusDeAdmOpen}
+              setIsOpen={toggleModalRemoverStatusDeAdm}
+              />
+
+              <Button onClick={handleRemoverStatusDeAdm}>Remover status de admin de um usuário</Button>
             </>
           }
         </Content>

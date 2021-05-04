@@ -1,27 +1,23 @@
 import React, { useRef, useCallback, useState } from 'react';
 
-import { FiSend, FiArrowRightCircle } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
 import { Form } from './styles';
 import Modal from '../Modal';
-import Input from '../Input';
 import Button from '../../components/Button';
 import api from '../../services/api';
 
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { useAuth } from '../../hooks/auth';
-import { useHistory } from 'react-router-dom';
-import { AxiosResponse } from 'axios';
+import { useToast } from '../../hooks/toast';
 
 interface IModalProps {
   isOpen: boolean;
   setIsOpen: () => void;
 }
 
-interface IRetryInvoiceWithNewPaymentMethod{
-  customerId: string,
-  paymentMethodId: string,
-  invoiceId: string,
+interface IPremium{
+  status: string;
+  dataExpiracao?: Date;
 }
 
 const ModalAssinatura: React.FC<IModalProps> = ({
@@ -29,12 +25,14 @@ const ModalAssinatura: React.FC<IModalProps> = ({
   setIsOpen,
 }) => {
   const [error, setError] = useState<string | null>(null);
+
   const stripe = useStripe();
   const elements = useElements();
   const formRef = useRef<FormHandles>(null);
+  const { addToast } = useToast();
+  const [carregando, setCarregando] = useState<boolean>(false);
 
   const { usuario, atualizaUsuario } = useAuth();
-  const history = useHistory();
 
   const CARD_ELEMENT_OPTIONS = {
     style: {
@@ -67,23 +65,12 @@ const ModalAssinatura: React.FC<IModalProps> = ({
       throw new Error();
     }
 
-    let responseUser: AxiosResponse<any>;
-
-    //Cria customer se usuário não tiver registro no stripe
-    /*
-    if(!usuario.idCustomer){
-      responseUser = await api.post('/usuarios/premium/customer');
-    } else {
-      //Verifica se idCustomer existente é valida
-      responseUser = await api.get('/usuarios/premium/customer');
-    }
-    */
-    responseUser = await api.post('/usuarios/premium/customer');
-
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
       throw new Error();
     }
+
+    setCarregando(true);
 
     const { error, paymentMethod } = await stripe.createPaymentMethod({
       type: 'card',
@@ -92,81 +79,102 @@ const ModalAssinatura: React.FC<IModalProps> = ({
     if (!paymentMethod) {
       throw new Error();
     }
-    
-    //Salva os dados do cartão no customer
-    await api.put('/usuarios/premium/customer', ({paymentMethodId: paymentMethod.id}));
-
-    const latestInvoicePaymentIntentStatus = localStorage.getItem(
-    'latestInvoicePaymentIntentStatus'
-    ); 
 
     if (error) {
       console.log('[createPaymentMethod error]', error);
     } else {
-      const paymentMethodId = paymentMethod.id;
-
-      if (latestInvoicePaymentIntentStatus === 'requires_payment_method') {
+      
+      if ( usuario.statusPremium === 'pagamento-recusado') {
         // Update the payment method and retry invoice payment
-        const invoiceId = localStorage.getItem('latestInvoiceId');
-        
-        if(invoiceId){
-          retryInvoiceWithNewPaymentMethod({
-            customerId: usuario.idCustomer,
-            paymentMethodId,
-            invoiceId,
-          });  
-        }
+
+        await api.put('/usuarios/premium/subscription', ({
+          idUser: usuario.id,
+          paymentMethodId: paymentMethod.id,
+        }))
+
+        atualizaUsuario({
+          ...usuario,
+          statusPremium: 'ativo'
+        });
+
+        addToast({
+          type: "success",
+          title: "Assinatura realizada",
+          description: "Assinatura realizada com sucesso",
+        });
 
       } else {
-        // Create the subscription
-        api.post('/usuarios/premium/subscription', ({paymentMethodId: paymentMethod.id}))
-        .then((response) => {
-          return response.data;
-        })
-        .then((result) => {
-          if (result.error) {
-            throw result;
-          }
-          return result;
-        })
-        .then((result) => {
-          return {
-            paymentMethodId: paymentMethodId,
-            subscription: result,
-          };
-        })
-        .then(()=>{
-          //TODO
-          // If attaching this card to a Customer object succeeds,
-          // but attempts to charge the customer fail, you
-          // get a requires_payment_method error.
-        })
-        .then(()=>{
-          //Subscription complete
+        try{
+          // Cria a Subscription juntamente com o Customer se não existir
+          api.post('/usuarios/premium', ({
+            idUser: usuario.id,
+            paymentMethodId: paymentMethod.id
+          }))
+          .then(response => {
+            const premium: IPremium = response.data.premium;
 
-          //Atualiza os dados do usuário contidos no localstorage
+            console.log(premium);
+            console.log(response.data.ultimoInvoiceId);
 
-          const novosDadosDoUsuario = {
-            ...usuario,
-            premiumAtivo: true,
-          }
+            if(!premium){
+              addToast({
+                type: 'error',
+                title: 'Erro  na criação no premium',
+                description: 'Ocorreu um erro na criação no premium'
+              });
 
-          console.log(novosDadosDoUsuario);
+              return;
+            }
 
-          atualizaUsuario(novosDadosDoUsuario);
+            if(premium.status === 'pagamento-recusado'){
+              // If attaching this card to a Customer object succeeds,
+              // but attempts to charge the customer fail, you
+              // get a requires_payment_method error.
+    
+              localStorage.setItem('latestInvoiceId', response.data.ultimoInvoiceId);
 
-          history.push('/premium');
-        })
-        .catch((error) => {
-          console.log(error);
-		    })
+              atualizaUsuario({
+                ...usuario,
+                statusPremium: 'pagamento-recusado',
+              });
+    
+              addToast({
+                type: 'error',
+                title: 'Falha no pagamento',
+                description: 'Ocorreu uma falha no pagamento, tente novamente'
+              });
+    
+            } else if(premium.status === 'ativo'){
+              ///Subscription complete
+              //Atualiza os dados do usuário contidos no localstorage
+  
+              atualizaUsuario({
+                ...usuario,
+                statusPremium: 'ativo'
+              });
+    
+              addToast({
+                type: "success",
+                title: "Assinatura realizada",
+                description: "Assinatura realizada com sucesso",
+              });
+            }
+          })
+
+          
+        } catch (err){
+          addToast({
+            type: 'error',
+            title: 'Erro',
+            description: 'Ocorreu um erro'
+          });
+        }
+
       }
-    }
-  }, [stripe, elements, usuario, history, atualizaUsuario]);
 
-  const retryInvoiceWithNewPaymentMethod = ({ customerId, paymentMethodId, invoiceId }: IRetryInvoiceWithNewPaymentMethod) => {
-    console.log('retryInvoiceWithNewPaymentMethod');
-  }
+      setIsOpen();
+    }
+  }, [stripe, elements, usuario, atualizaUsuario, addToast, setIsOpen]);
   
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
@@ -178,7 +186,7 @@ const ModalAssinatura: React.FC<IModalProps> = ({
         />
         <div className="card-errors" role="alert">{error}</div>
 
-        <Button type="submit">Realizar assinatura premium</Button>
+        <Button loading={carregando} type="submit">Realizar assinatura premium</Button>
       </Form>
     </Modal>
   );

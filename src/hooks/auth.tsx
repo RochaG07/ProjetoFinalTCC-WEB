@@ -12,10 +12,9 @@ interface Usuario {
     telefone: string;
     municipio: string;
     estado: string;
-    idCustomer: string;
-    idSubscription: string;
     trocasDisponiveis: number;
-    premiumAtivo: boolean;
+    premiumExpiracao: Date | null;
+    statusPremium: string;
     possuiStatusDeAdm: boolean;
     proxTrocaDisp: Date | null;
 }
@@ -50,18 +49,35 @@ const AuthProvider: React.FC = ({ children }) => {
         // Só é executado quando o usuário da um refresh na página F5
 
         const token = localStorage.getItem('@TCC:token');
-        const usuario = localStorage.getItem('@TCC:usuario');
+        const usuarioJSON = localStorage.getItem('@TCC:usuario');
 
-        //TODO Redirecionar usuário para página de login caso o token tenha expirado
 
-        if(token && usuario) {
+        if(token && usuarioJSON) {
             api.defaults.headers.authorization = `Bearer ${token}`;
 
-            //Reloga o usuário com um novo socket.id
-            //TODO mover a lógica de relogar o usuário no servidor ws para um lugar mais relevante 
-            socket.emit('login', JSON.parse(usuario).id);
+            // Redireciona o usuário para página de login caso o token tenha expirado
+            /*
+            verify(token, jwt.secret, function(err) {
+                if(err){
+                    localStorage.removeItem('@TCC:token');
+                    localStorage.removeItem('@TCC:usuario');
 
-            return { token, usuario: JSON.parse(usuario) };
+                    return {};
+                }
+            });
+            */
+           
+            const usuario = JSON.parse(usuarioJSON);
+
+            const loginData = {
+                idUser: usuario.id, 
+                nome: usuario.nome
+            };
+
+            //Reloga o usuário com um novo socket.id
+            socket.emit('login', loginData);
+
+            return { token, usuario };
         }
 
         return {} as AuthState;
@@ -74,9 +90,11 @@ const AuthProvider: React.FC = ({ children }) => {
         });
 
         // Armazena a resposta da requisição no localstorage
-        let { token, usuario, premiumAtivo } = response.data;
+        let { token, usuario, premiumAtivo, premiumExpiracao, statusPremium } = response.data;
 
         usuario.premiumAtivo = premiumAtivo;
+        usuario.premiumExpiracao = premiumExpiracao;
+        usuario.statusPremium = statusPremium;
 
         localStorage.setItem('@TCC:token', token);
         localStorage.setItem('@TCC:usuario', JSON.stringify(usuario));

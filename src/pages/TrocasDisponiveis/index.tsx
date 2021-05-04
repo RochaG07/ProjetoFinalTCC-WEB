@@ -5,8 +5,6 @@ import { useToast } from '../../hooks/toast';
 import Header from '../../components/Header';
 import Navbar from '../../components/Navbar';
 
-import { FiArrowRightCircle } from 'react-icons/fi';
-
 import { Container, Content, Troca, Filtro} from './styles';
 
 import api from '../../services/api';
@@ -14,8 +12,9 @@ import ModalTrocaDisponivel from '../../components/ModalTrocaDisponivel';
 import Select from '../../components/Select';
 import { FormHandles } from '@unform/core';
 import Button from '../../components/Button';
+import {socket} from '../../services/socket';
 
-interface ITroca{
+export interface ITroca{
     id: string,
     descricao: string,
     ativo: boolean,
@@ -27,6 +26,8 @@ interface ITroca{
     nomeConsoleJogoDesejado: string,
     estado: string,
     municipio: string,
+    idUser: string,
+    username: string,
 }
 
 export interface IHandleEnviarConvite{
@@ -100,6 +101,7 @@ const NovaTroca: React.FC = () => {
             })
         }
 
+
         async function loadJogos(): Promise<void> {
             api.get<IJogo[]>('/jogos')
             .then(response => {
@@ -137,7 +139,19 @@ const NovaTroca: React.FC = () => {
             mensagem: data.mensagem,
             idTroca: data.troca.id,
         })
-        .then(() => {
+        .then(response => {
+            return api.post('/usuarios/notificacoes', {
+                conteudo: "Uma troca sua recebeu um convite!",
+                idUserAlvo: response.data.troca.idUser,
+            })
+        })
+        .then(response => {
+            socket.emit('apresentar nova notificacao', {
+                id: response.data.id,
+                conteudo: response.data.conteudo,
+                idUserAlvo: response.data.idUser,
+            });
+
             addToast({
                 type: "success",
                 title: "Convite enviado",
@@ -151,7 +165,6 @@ const NovaTroca: React.FC = () => {
                 title: 'Erro no envio de convite',
                 description: 'Só é possivel enviar um convite por troca'
             });
-
         });
     }
 
@@ -207,8 +220,7 @@ const NovaTroca: React.FC = () => {
             setKeyConsolesDesejados(`key_desej_vazio`);
         } 
     }
-
-    
+   
     async function handleAplicarFiltros(data: IFiltro): Promise<void> {
 
         api.get<ITroca[]>(`/trocas?estado=${data.estado}&municipio=${data.municipio}&nomeJogoOfertado=${data.nomeJogoOfertado}&nomeConsoleJogoOfertado=${data.nomeConsoleJogoOfertado}&nomeJogoDesejado=${data.nomeJogoDesejado}&nomeConsoleJogoDesejado=${data.nomeConsoleJogoDesejado}
@@ -235,8 +247,9 @@ const NovaTroca: React.FC = () => {
         <Container>          
             <Header/>  
             <Navbar selectedPage='trocas-disponiveis'/>   
-            <Content>
-                <Filtro ref={formRef} onSubmit={handleAplicarFiltros}>
+            <Filtro ref={formRef} onSubmit={handleAplicarFiltros}>
+
+                <div className='selects'>
                     <Select 
                         placeholder="Estado"
                         name="estado"
@@ -252,7 +265,8 @@ const NovaTroca: React.FC = () => {
                         key={keyMunicipio}
                         isClearable={true}
                     />
-
+                </div>
+                <div className='selects'>
                     <Select 
                         placeholder="Jogo ofertado"
                         name="nomeJogoOfertado" 
@@ -268,7 +282,8 @@ const NovaTroca: React.FC = () => {
                         key={keyConsolesOfertados}
                         isClearable={true}
                     />
-
+                </div>
+                <div className='selects'>
                     <Select 
                         placeholder="Jogo desejado"
                         name="nomeJogoDesejado" 
@@ -284,10 +299,14 @@ const NovaTroca: React.FC = () => {
                         key={keyConsolesDesejados}
                         isClearable={true}
                     />
-
+                </div>
+                <div  className='botoes'>
                     <Button type='submit'>Aplicar Filtros</Button>
                     <Button type='button' onClick={handleRemoverFiltros}>Remover Filtros</Button>
-                </Filtro>
+                </div>
+            </Filtro>
+
+            <Content>
 
 
                 {        
@@ -304,22 +323,21 @@ const NovaTroca: React.FC = () => {
                     trocas.map(troca => (
                         troca.ativo &&
                         <Troca key={troca.id} onClick={() => handleSelecionarTroca(troca)}>
-                            <p>{troca.estado} - {troca.municipio}</p>
+                            <div className='capas'>
+                                <img src={troca.urlDaCapaJogoOfertado} alt={troca.nomeJogoOfertado} />
+                                <img src={troca.urlDaCapaJogoDesejado} alt={troca.nomeJogoDesejado} />
+                            </div>
+
                             <div className='specJogo'>
                                 <h1>{troca.nomeJogoOfertado}</h1>
                                 <p>{troca.nomeConsoleJogoOfertado}</p>
-                            </div>
-        
-                            <div className='capas'>
-                                <img src={troca.urlDaCapaJogoOfertado} alt={troca.nomeJogoOfertado} />
-                                <FiArrowRightCircle/>
-                                <img src={troca.urlDaCapaJogoDesejado} alt={troca.nomeJogoDesejado} />
-                            </div>
-        
-                            <div className='specJogo'>
+                                <p id='por'>por</p>
                                 <h1>{troca.nomeJogoDesejado}</h1>
                                 <p>{troca.nomeConsoleJogoDesejado}</p>
                             </div>
+
+
+                            <p>{troca.estado} - {troca.municipio}</p>
                         </Troca>
                     ))
                 }

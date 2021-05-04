@@ -46,6 +46,7 @@ const CriarConta: React.FC = () => {
     const [optionsEstados, setOptionsEstados] = useState<IOptions[]>([]);
     const [optionsMunicipios, SetOptionsMunicipios] = useState<IOptions[]>([]);
     const [keyMunicipio, setKeyMunicipio] = useState<string | null>();
+    const [carregando, setCarregando] = useState<boolean>(false);
 
     useEffect(()=>{
         api.get<IInfoIBGE[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome')
@@ -60,10 +61,10 @@ const CriarConta: React.FC = () => {
 
     const handleSubmit = useCallback(
         async (data: CriarContaFormData) => {    
+            setCarregando(true);
+
             try {
                 formRef.current?.setErrors({});
-
-                console.log(data);
 
                 //schema -> Utilizado para fazer a validação em um objeto
                 const schema = Yup.object().shape({
@@ -82,31 +83,46 @@ const CriarConta: React.FC = () => {
                     abortEarly: false,  
                 });
 
-                await api.post('/usuarios', data);
+                api.post('/usuarios', data)
+                .then(() => {
+                    addToast({
+                        type: "success",
+                        title: "Cadastro realizado",
+                        description: "Você já pode fazer seu login!",
+                    });
 
-                history.push('/login');
+                    history.push('/login');
+                })
+                .catch(err => {
+                    console.log(err);
 
-                addToast({
-                    type: "success",
-                    title: "Cadastro realizado",
-                    description: "Você já pode fazer seu login!",
-                });
-                
+                    addToast({
+                        type: 'error',
+                        title: 'Erro no cadastro',
+                        description: 'Ocorreu um erro ao fazer cadastro'
+                    });     
+                })
+                .finally(() => {
+                    setCarregando(false);
+                })
+
             } catch (err) {
+                setCarregando(false);
+
                 if(err instanceof Yup.ValidationError) {
                     const errors = getValidationErrors(err);
 
                     // ? -> Serve para verificar se a variável existe para então chamar a função setErrors (optional chaining)
                     formRef.current?.setErrors({errors});
 
+                    addToast({
+                        type: 'error',
+                        title: 'Erro no cadastro',
+                        description: 'Preencher todos os campos'
+                    });
+
                     return;
                 }
-
-                addToast({
-                    type: 'error',
-                    title: 'Erro no cadastro',
-                    description: 'Ocorreu um erro ao fazer cadastro'
-                });
             }
     }, [addToast, history]);
 
@@ -157,7 +173,7 @@ const CriarConta: React.FC = () => {
                         key={keyMunicipio}
                     />
 
-                    <Button type="submit">Criar conta</Button>
+                    <Button loading={carregando} type="submit">Criar conta</Button>
                 </Form>
 
                 <Link to="/login">

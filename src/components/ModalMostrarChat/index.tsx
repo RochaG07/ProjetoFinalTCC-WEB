@@ -5,17 +5,17 @@ import { Form} from './styles';
 import Modal from '../Modal';
 import Input from '../Input';
 
-import {chatSocket} from '../../services/socket';
+import {socket} from '../../services/socket';
 
-import { FiSend } from 'react-icons/fi';
+import { FiChevronRight } from 'react-icons/fi';
 import {useAuth} from '../../hooks/auth';
 import api from '../../services/api';
-import { createNonNullExpression } from 'typescript';
+import { INegociacao } from '../../pages/Negociacoes';
 
 interface IModalProps {
   isOpen: boolean;
   setIsOpen: () => void;
-  idNeg: string;
+  negociacao: INegociacao;
 }
 
 interface IFormData{
@@ -30,134 +30,152 @@ interface MensagemChat {
   idNeg: string,
 }
 
-interface IUserInChat {
+interface INomes {
   socketId: string,
   nome: string,
-  idNeg: string,
 }
 
 const ModalMostrarChat: React.FC<IModalProps> = ({
   isOpen,
   setIsOpen,
-  idNeg
+  negociacao
 }) => {
   const formRef = useRef<FormHandles>(null);
   const {usuario} = useAuth();
 
   const [mensagens, setMensagens] = useState<MensagemChat[]>([]);
-  //const [UsuariosNaSala, setUsuariosNaSala] = useState<IUserInChat[]>([]);
+
+  const [nomeDeUsuariosNaSala, setNomeDeUsuariosNaSala] = useState<INomes[]>([]);
 
   useEffect(() => {
     async function loadMensagens(): Promise<void>{
-      api.get<MensagemChat[]>(`trocas/mensagemChat/${idNeg}`)
+      api.get<MensagemChat[]>(`trocas/mensagemChat/${negociacao.id}`)
       .then(response => {
         setMensagens(response.data);
       })
     }
 
     loadMensagens();
-  }, [idNeg]);
+  }, [negociacao.id]);
 
   
   useEffect(() => {
     if(isOpen){
-      chatSocket.emit('abrir chat', {
-        nomeusuario: usuario.nome,
-        idNeg
+      socket.emit('abrir chat', {
+        nome: usuario.nome,
+        idNeg: negociacao.id
       });
 
     } else {
-      chatSocket.emit('fechar chat', {
-        nomeusuario: usuario.nome,
-        idNeg
+      socket.emit('fechar chat', {
+        nome: usuario.nome,
+        idNeg: negociacao.id
       });
 
-      chatSocket.offAny();
+      socket.offAny();
     }
-  }, [ idNeg, isOpen, usuario])
+  }, [ negociacao.id, isOpen, usuario])
 
-
-  /*
-  //Entrada de usuário na sala
-  useEffect(() => {
-    chatSocket.off('usuario entrou');
-
-    chatSocket.on('usuario entrou', (usuarioQueEntrou: IUserInChat) => {
-      console.log('usuario entrou');
-
-      setUsuariosNaSala([...UsuariosNaSala, usuarioQueEntrou]);
-    }) 
-  }, [UsuariosNaSala]);
-
-  //Saida de usuário na sala
-  useEffect(() => {
-    chatSocket.off('usuario saiu');
-
-    chatSocket.on('usuario saiu', (usuarioQueSaiu: IUserInChat) => {
-      //console.log('usuario saiu');
-
-      //remover usuário da lista quando ele sair do chat
-
-      console.log(usuarioQueSaiu);
-
-      console.log(UsuariosNaSala.filter(usuarioNaSala => (
-        usuarioNaSala.socketId !== usuarioQueSaiu.socketId
-      )));
-
-      setUsuariosNaSala(UsuariosNaSala.filter(usuarioNaSala => (
-        usuarioNaSala.socketId !== usuarioQueSaiu.socketId 
-      )));
-    }) 
-  }, [UsuariosNaSala]);
-  */
-  
   useEffect(() => {
     //Evita que seja criada vários listeners de 'mensagem recebida'
-    chatSocket.off('mensagem recebida');
+    socket.off('mensagem recebida');
 
-    chatSocket.on('mensagem recebida', (mensagem: MensagemChat) => {
+    socket.on('mensagem recebida', (mensagem: MensagemChat) => {
       setMensagens([...mensagens, mensagem]);
+      irParaUltimaMensagem();
     });
 
   }, [mensagens]);
 
+  
+  useEffect(() => {
+    socket.off('usuarios na sala');
+
+    socket.on('usuarios na sala', (nomes: INomes[]) => {
+      setNomeDeUsuariosNaSala(nomes);
+    });
+
+  }, []);
+
+  useEffect(() => {
+    socket.off('add nome do usuario na sala');
+    socket.off('remove nome do usuario na sala');
+
+    socket.on('add nome do usuario na sala', (nome: INomes) => {
+      setNomeDeUsuariosNaSala([...nomeDeUsuariosNaSala, nome]);
+    });
+
+    socket.on('remove nome do usuario na sala', (nome: INomes) => {
+      setNomeDeUsuariosNaSala(nomeDeUsuariosNaSala.filter(nomes => (
+        nomes.socketId !== nome.socketId
+      )));
+    });
+
+  }, [nomeDeUsuariosNaSala]);
+
   const handleSubmit = useCallback(
     async (data: IFormData) => {     
+      
+      if(data.mensagem === '') return;
 
       api.post<MensagemChat>(`trocas/mensagemChat`, {
         conteudo: data.mensagem,
         nomeusuario: usuario.nome,
-        idNeg,
+        idNeg: negociacao.id,
       })
       .then(response => {
-        chatSocket.emit('enviar mensagem', response.data);
+        socket.emit('enviar mensagem', response.data);
 
         setMensagens([...mensagens, response.data]);
+        irParaUltimaMensagem();
       })
+
+      formRef.current?.setFieldValue('mensagem', '');
     },
-    [ usuario, idNeg, mensagens ]
+    [ usuario, negociacao.id, mensagens ]
   );
+
+  function irParaUltimaMensagem(): void{
+    const div = document.getElementById('chat');
+
+    if(div){
+      div.scrollTop = div.scrollHeight - div.clientHeight;
+    }
+  }
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <Form ref={formRef} onSubmit={handleSubmit}>
-      <h1>{idNeg}</h1>
-
+      <h1>Negociação entre {negociacao.nomeUsuarioCriador} e {negociacao.nomeUsuarioSolicitador}</h1>
+      <h2>Troca do jogo {negociacao.troca.nomeJogoDesejado} pelo {negociacao.troca.nomeJogoOfertado}</h2>
       {
-        mensagens&&
-        mensagens.map(mensagem => (
-          <h3 key={mensagem.id}>{mensagem.nomeusuario+': '+mensagem.conteudo}</h3>
+        nomeDeUsuariosNaSala&&
+        nomeDeUsuariosNaSala.map(nomeNaSala => (
+          <p className="usuariosEmSala" key={nomeNaSala.socketId}>{nomeNaSala.nome} </p>
         ))
       }
+      <div id='chat'>
+      {     
+        mensagens&&
+        mensagens.map(mensagem => (
+          <p key={mensagem.id}>{mensagem.nomeusuario+': '+mensagem.conteudo}</p>
+        ))     
+      }
+      </div>
 
-      <Input name="mensagem" />
-
-      <button type="submit">
-          <div className="text">Enviar</div>
-          <div className="icon">
-            <FiSend size={24} />
+      <div id="enviarMensagem">
+        <Input name="mensagem" containerStyle={{
+          border: 'none',
+          borderTopRightRadius: "0px",
+          borderBottomRightRadius: "0px"
+        }}/>
+        <button type="submit">
+          <div id="text">Enviar</div>
+          <div id="icon">
+            <FiChevronRight size={24} />
           </div>
         </button>
+      </div>
 
       </Form>
     </Modal>
