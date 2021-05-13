@@ -13,8 +13,12 @@ export const Content = styled.div`
 	margin-left : 14%;
 	margin-right : 14%;
 
-
     background-color: #181b1f;
+
+    label{
+        color: #fff;
+
+    }
 `;
 
 export const Capas = styled.div`
@@ -28,6 +32,7 @@ export const Capas = styled.div`
 `;
 
 export const Ofertado = styled.div`
+
 `;
 
 export const Desejado = styled.div`

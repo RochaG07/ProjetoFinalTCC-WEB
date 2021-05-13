@@ -34,6 +34,7 @@ const customStyles = {
 const Select: React.FC<Props> = ({ name, ...rest }) => {
   const selectRef = useRef(null);
   const { fieldName, defaultValue, registerField, error } = useField(name);
+
   useEffect(() => {
     registerField({
       name: fieldName,
@@ -52,6 +53,7 @@ const Select: React.FC<Props> = ({ name, ...rest }) => {
       },
     });
   }, [fieldName, registerField, rest.isMulti]);
+
   return (
     <ReactSelect
       styles={customStyles}

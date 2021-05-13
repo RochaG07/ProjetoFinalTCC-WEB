@@ -8,7 +8,7 @@ import Button from '../../components/Button';
 import api from '../../services/api';
 import { useToast } from '../../hooks/toast';
 
-import capaPlaceholder from '../../assets/placeholder-image.png';
+import capaPlaceholder from '../../assets/Empty.png';
 
 interface IModalProps {
   isOpen: boolean;
@@ -45,6 +45,12 @@ const ModalDeletarJogo: React.FC<IModalProps> = ({
     async function loadJogos(): Promise<void> {
         api.get<IJogo[]>('/jogos')
         .then(response => {
+            response.data.sort((item1, item2) => {
+              if(item1.nome < item2.nome) return -1;
+              else if(item1.nome > item2.nome) return 1;
+              return 0;
+            })
+
             setOptionsJogos(response.data.map( jogo => ({
               label: jogo.nome,
               value: jogo.id,
@@ -85,19 +91,19 @@ const ModalDeletarJogo: React.FC<IModalProps> = ({
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <Form onSubmit={handleSubmit} ref={formRef}>
-        {
-          URLcapaJogoSelecionado?
-          <img src={URLcapaJogoSelecionado} alt="Jogo"/>
-          :
-          <img src={capaPlaceholder} alt="Jogo"/>
-        }
+
 
         <Select
           name="id"
           options={optionsJogos}
           onChange={(jogoSelecionado: any) => handleJogoSelecionado(jogoSelecionado)}
         />
-
+        {
+          URLcapaJogoSelecionado?
+          <img src={URLcapaJogoSelecionado} alt="Jogo"/>
+          :
+          <img src={capaPlaceholder} alt="Jogo"/>
+        }
         <Button type="submit">Deletar jogo</Button>
       </Form>
     </Modal>

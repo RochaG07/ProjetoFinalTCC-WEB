@@ -6,6 +6,7 @@ export const Form = styled(Unform)`
   padding: 48px 40px;
   display: flex;
   flex-direction: column;
+  min-height: 420px;
 
   button {
     font-weight: 600;

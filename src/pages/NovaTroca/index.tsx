@@ -22,7 +22,7 @@ import { FormHandles } from '@unform/core';
 import getValidationErrors from '../../utils/getValidationErrors';
 import { useHistory } from 'react-router-dom';
 
-import capaPlaceholder from '../../assets/placeholder-image.png';
+import capaPlaceholder from '../../assets/Empty.png';
 
 interface IJogo{
     id: string,
@@ -65,6 +65,12 @@ const TrocasDisponiveis: React.FC = () => {
         async function loadJogos(): Promise<void> {
             api.get<IJogo[]>('/jogos')
             .then(response => {
+                response.data.sort((item1, item2) => {
+                    if(item1.nome < item2.nome) return -1;
+                    else if(item1.nome > item2.nome) return 1;
+                    return 0;
+                })
+
                 setOptionsJogos(response.data.map( jogo => ({
                         label: jogo.nome,
                         value: jogo.id,
@@ -155,6 +161,8 @@ const TrocasDisponiveis: React.FC = () => {
 
         setURLcapaJogoOfertadoSelecionado(jogoSelecionado.capa_url);
 
+        jogoSelecionado.consoles.sort();
+
         setOptionsConsolesDoJogoOfertado(jogoSelecionado.consoles.map((cons: string) => ({
             label: cons,
             value: cons,
@@ -165,6 +173,8 @@ const TrocasDisponiveis: React.FC = () => {
         setKeyConsolesDesejados(`key_desej_${jogoSelecionado.value}`);
 
         setURLcapaJogoDesejadoSelecionado(jogoSelecionado.capa_url);
+        
+        jogoSelecionado.consoles.sort();
 
         setOptionsConsolesDoJogoDesejado(jogoSelecionado.consoles.map((cons: string) => ({
             label: cons,

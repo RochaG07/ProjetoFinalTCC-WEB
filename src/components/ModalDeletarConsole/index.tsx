@@ -37,6 +37,12 @@ const ModalDeletarConsole: React.FC<IModalProps> = ({
     async function loadConsoles(): Promise<void> {
         api.get<IConsole[]>('/jogos/consoles')
         .then(response => {
+            response.data.sort((item1, item2) => {
+              if(item1.nome < item2.nome) return -1;
+              else if(item1.nome > item2.nome) return 1;
+              return 0;
+            })
+
             setOptionsConsoles(response.data.map( jogo => ({
               label: jogo.nome,
               value: jogo.id,
