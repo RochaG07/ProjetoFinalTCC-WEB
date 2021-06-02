@@ -93,7 +93,7 @@ Exibe os dados do usuário logado, onde o mesmo poderá realizar alterações li
 
 #### Premium
 
-<img src='https://raw.githubusercontent.com/RochaG07/ProjetoFinalTCC-WEB/master/media/TelaMeuPremium.png'>
+<img src='https://raw.githubusercontent.com/RochaG07/ProjetoFinalTCC-WEB/master/media/TelaPremium.png'>
 
 Página que o usuário poderá realizar a assinatura do serviço premium, caso o usuário não tenha iniciado a assinatura é exibida um botão que ao ser clicado abre um modal que contém um campo para que seja inserido os dados necessários para a assinatura. Caso esteja com a assinatura ativa são exibidos duas opções a primeira sendo a de trocar o cartão utilizado na cobrança automática e a segunda é o cancelamento da assinatura, essa última exigindo confirmação. Caso o usuário tenha cancelado sua assinatura será exibida uma opção para que o mesmo possa reativa-lá seguindo os mesmos passos para a criação da assinatura.
 
