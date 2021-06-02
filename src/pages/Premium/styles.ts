@@ -14,6 +14,10 @@ export const Content = styled.div`
 	margin-right : 14%;
 
     background-color: #181b1f;
+
+    h1{
+        color: #fff;
+    }
 `;
 
 export const Form = styled.form`

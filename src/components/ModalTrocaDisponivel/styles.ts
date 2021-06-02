@@ -44,6 +44,10 @@ export const Form = styled(Unform)`
       font-weight: 100;
     }
 
+    h1, p {
+      color: #fff;
+    }
+
     #estadoMunicipio{
       margin: 10px 0 10px 0;
       font-size: 0.8em;

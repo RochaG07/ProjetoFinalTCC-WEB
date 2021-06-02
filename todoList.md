@@ -1,0 +1,64 @@
+- [x]  Página de login
+- [x]  Página de cadastro
+- [x]  Cadastrar usuário pelo front
+- [x]  Autenticação de usuário
+- [x]  Header
+- [x]  Navbar
+- [x]  Página de esqueci minha senha funcionalidade
+- [x]  Página de esqueci minha senha estilização
+- [x]  Página de reset de senha funcionalidade
+- [x]  Página de reset de senha estilização
+- [x]  Página de trocas disponíveis funcionalidade
+- [x]  Modal com detalhes de uma troca
+- [x]  Enviar convite para a troca selecionada pelo front
+- [x]  Exibir um com um erro se um usuário mandar um convite para uma troca mais de uma vez
+- [x]  Filtragem de trocas por estados
+- [x]  Filtragem de trocas por jogos
+- [x]  Filtragem de trocas por consoles
+- [x]  Página de criar nova troca funcionalidade
+- [x]  Página de minhas trocas funcionalidade
+- [x]  Listar todos os convites pendentes de cada troca
+- [x]  Aceitar ou recusar convite em minhas trocas
+- [x]  Desativar uma troca
+- [x]  Página de negociações que o usuário logado esta envolvido
+- [x]  Desativar uma negociação
+- [x]  Página de meu perfil funcionalidade
+- [x]  Página de meu perfil estilização
+- [x]  Alterar informações do perfil
+- [x]  Alterar foto de avatar na página de meu perfil
+- [x]  Página de premium (para usuários não premium), abre o modal com o checkout
+- [x]  Página de premium (para usuários premium), opções de cancelamento e alterar meio de pagamento
+- [x]  Página de funções de admin
+    - [x]  Cadastro de jogos funcionalidade
+    - [x]  Cadastro de consoles funcionalidade
+    - [x]  Envio de avisos
+    - [x]  Exibir avisos existentes de um usuário
+    - [x]  Exibir notificações existentes  de um usuário
+    - [x]  Adicionar permissão a um admin
+    - [x]  Atribuir status de admin a um usuário
+- [x]  Realizar assinatura premium
+- [x]  Cancelar assinatura premium
+- [x]  Atualizar método de pagamento
+- [x]  Gerar notificação quando uma para troca de um usuário  receber um convite
+- [x]  Gerar notificação para o usuário que enviou o convite caso ele for aceito
+- [x]  Mostrar notificações em tempo real
+- [x]  Mostrar avisos em tempo real
+- [x]  Ajeitar layout do filtro na página de trocas disp
+- [x]  Melhorar Card de trocas disp
+- [x]  Melhorar Card de negociacoes
+- [x]  Melhorar Card de minhas trocas
+- [x]  Melhorar Card de convites da troca
+- [x]  Melhorar detalhes da troca
+- [x]  Opção de deletar jogo na página de admin
+- [x]  Opção de deletar console na página de admin
+- [x]  Opção de remover status de admin na página de admin (não remover o p´roprio admin)
+- [x]  Melhorar visual do chat
+- [x]  Resolver bug com 'premium cancelado até *data*' consumindo trocas disponíveis
+- [x]  Loading na compra da assinatura
+- [x]  Loading no login
+- [x]  Deletar notificação
+- [x]  Desativar aviso
+- [x]  confirmar na hora de excluir uma negociacao \ troca
+- [x]  Melhor exibição de notificações/avisos
+- [x]  confirmar na hora de cancelar assinatura
+- [x]  Ajeitar botão (X) de excluir negociação
