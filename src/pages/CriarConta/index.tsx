@@ -157,7 +157,7 @@ const CriarConta: React.FC = () => {
 
                     <Input name="nome" icon={FiItalic} placeholder="Nome"/>
 
-                    <Input name="telefone" icon={FiPhone} placeholder="Telefone"/>
+                    <Input name="telefone" type='number' icon={FiPhone} placeholder="Telefone"/>
 
                     <Select 
                         placeholder="Estado"

@@ -2,52 +2,31 @@ import styled from 'styled-components';
 import { lighten, shade } from 'polished';
 import { Form as Unform } from '@unform/web';
 
-export const Negociacao = styled.div`
-  margin-top: 35px;
-  border-radius: 5px;
-  height : 220px;
-  background-color: #68a;
-  box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
-
-  width: 92%;
-
-  display: flex;
-  justify-content: center;
-
-  h1 {
-    font-weight: 500;
-    font-size: 1.6em;
-    margin-bottom: 20px;
-  }
-
-  
-  &:hover{
-    background: ${shade(0.2, '#68a')};
-    cursor: pointer;
-  }
-`;
-
 export const Form = styled(Unform)`
   padding: 48px 40px;
   display: flex;
   flex-direction: column;
 
-  
-
   h1 {
     font-weight: 500;
     font-size: 1.6em;
+    color: #fff;
+
   }
+
   h2 {
     font-weight: 100;
     font-size: 1.3em;
     margin-bottom: 20px;
+    color: ${shade(0.2, '#fff')};
   }
 
   .usuariosEmSala{
-
+    color: #fff;
+    
     ::before{
       content: 'Usuários em sala: ';
+      
     };
 
   }

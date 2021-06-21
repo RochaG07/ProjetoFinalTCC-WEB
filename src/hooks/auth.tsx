@@ -54,18 +54,6 @@ const AuthProvider: React.FC = ({ children }) => {
 
         if(token && usuarioJSON) {
             api.defaults.headers.authorization = `Bearer ${token}`;
-
-            // Redireciona o usuário para página de login caso o token tenha expirado
-            /*
-            verify(token, jwt.secret, function(err) {
-                if(err){
-                    localStorage.removeItem('@TCC:token');
-                    localStorage.removeItem('@TCC:usuario');
-
-                    return {};
-                }
-            });
-            */
            
             const usuario = JSON.parse(usuarioJSON);
 

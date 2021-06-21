@@ -160,7 +160,6 @@ const ModalAssinatura: React.FC<IModalProps> = ({
               });
             }
           })
-
           
         } catch (err){
           addToast({
@@ -169,7 +168,6 @@ const ModalAssinatura: React.FC<IModalProps> = ({
             description: 'Ocorreu um erro'
           });
         }
-
       }
 
       setIsOpen();

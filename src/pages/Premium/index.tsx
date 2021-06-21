@@ -78,6 +78,14 @@ const Premium: React.FC = () => {
           />
           <h1>Status do Premium: Não Iniciado</h1>
 
+          <p>Com a assinatura você terá acesso ao seguinte benefício:</p>
+
+          <ul>
+            <li>Número ilimitado de trocas mensais.</li>
+          </ul>
+
+          <h2>Valor mensal: R$ 10,00</h2>
+
           <Button onClick={handleAssinarPremium}>Assinar Premium</Button>
         </Content>
       </Container>
@@ -127,6 +135,7 @@ const Premium: React.FC = () => {
           setIsOpen={toggleModalAssinatura}
           />
           <h1>Status do Premium: Ativo</h1>
+
           <Button onClick={handleAlterarCartao}>Alterar cartão de crédito</Button>
           <Button onClick={handleCancelarAssinaturaPremium}>Cancelar assinatura premium</Button>
         </Content>

@@ -16,8 +16,23 @@ export const Content = styled.div`
     background-color: #181b1f;
 
     h1{
+        margin-bottom: 20px;
+    }
+
+    h2{
+        margin-top: 40px;
+    }
+
+    p{
+        margin-bottom: 5px;    
+    }
+
+
+
+    h1, h2, p, li{
         color: #fff;
     }
+
 `;
 
 export const Form = styled.form`

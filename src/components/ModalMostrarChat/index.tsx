@@ -148,12 +148,14 @@ const ModalMostrarChat: React.FC<IModalProps> = ({
       <Form ref={formRef} onSubmit={handleSubmit}>
       <h1>Negociação entre {negociacao.nomeUsuarioCriador} e {negociacao.nomeUsuarioSolicitador}</h1>
       <h2>Troca do jogo {negociacao.troca.nomeJogoDesejado} pelo {negociacao.troca.nomeJogoOfertado}</h2>
+      <p className="usuariosEmSala">
       {
         nomeDeUsuariosNaSala&&
         nomeDeUsuariosNaSala.map(nomeNaSala => (
-          <p className="usuariosEmSala" key={nomeNaSala.socketId}>{nomeNaSala.nome} </p>
+          nomeNaSala.nome + ' '
         ))
       }
+      </p>
       <div id='chat'>
       {     
         mensagens&&
